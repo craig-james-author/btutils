@@ -15,7 +15,6 @@ SFEMP3Shield MP3player;
 BtUtils bt(&sd, &MP3player);
 
 void setup() {
-
 }
 
 void loop() {
@@ -24,39 +23,30 @@ void loop() {
   int touchStatus = bt.getPinTouchStatus(&trackNumber);
   int lastPlayed  = bt.getLastTrackPlayed();
 
-  if (touchStatus != TOUCH_NO_CHANGE) {
+  if (touchStatus = NEW_TOUCH) {
 
-    if (touchStatus = NEW_TOUCH) {
+    int playerStatus = bt.getPlayerStatus();
 
-      bt.log_action("pin touched: ", trackNumber);
-      bt.turnLedOn();
-
-      int playerStatus = bt.getPlayerStatus();
-
-      if (playerStatus == IS_PLAYING) {
-	if (lastPlayed == trackNumber) {
-	  bt.pauseTrack(trackNumber);
-	} else {
-	  bt.queueTrackToStartAfterDelay(trackNumber);
-	}
-      }
-      else if (playerStatus == IS_PAUSED) {
-	if (trackNumber == lastPlayed) {
-	  bt.resumeTrack(trackNumber);
-	} else {
-	  bt.queueTrackToStartAfterDelay(trackNumber);
-	}
-      }
-      else if (playerStatus == IS_STOPPED) {
+    if (playerStatus == IS_PLAYING) {
+      if (lastPlayed == trackNumber) {
+	bt.pauseTrack();
+      } else {
 	bt.queueTrackToStartAfterDelay(trackNumber);
-      }     
+      }
     }
-    else if (touchStatus == NEW_RELEASE) {
-      bt.log_action("pin released: ", trackNumber);
-      bt.turnLedOff();
-    } 
+    else if (playerStatus == IS_PAUSED) {
+      if (trackNumber == lastPlayed) {
+	bt.resumeTrack();
+      } else {
+	bt.queueTrackToStartAfterDelay(trackNumber);
+      }
+    }
+    else if (playerStatus == IS_STOPPED) {
+      bt.queueTrackToStartAfterDelay(trackNumber);
+    }     
   }
 
-  bt.doLoopTasks();
+  // We're using delays and fade in, so must call the timer tasks
+  bt.doTimerTasks();
 
 }
