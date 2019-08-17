@@ -1,0 +1,16 @@
+BtUtils	KEYWORD1
+log_action	KEYWORD2
+turnLedOn	KEYWORD2
+turnLedOff	KEYWORD2
+getPinTouchStatus	KEYWORD2
+doTimerTasks	KEYWORD2
+setTouchReleaseThreshold	KEYWORD2
+setVolume	KEYWORD2
+setFadeInTime	KEYWORD2
+getPlayerStatus	KEYWORD2
+getLastTrackPlayed	KEYWORD2
+queueTrackToStartAfterDelay	KEYWORD2
+startTrack	KEYWORD2
+resumeTrack	KEYWORD2
+pauseTrack	KEYWORD2
+setStartDelay	KEYWORD2
