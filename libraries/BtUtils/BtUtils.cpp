@@ -64,6 +64,15 @@ void BtUtils::turnLedOff() {
  * Touch system: was a key touched or released?
  ----------------------------------------------------------------------*/
 
+void BtUtils::setTouchReleaseThreshold(int touchThreshold, int releaseThreshold) {
+  if (touchThreshold < 1)
+    touchThreshold = 1;
+  if (releaseThreshold >= touchThreshold)
+    releaseThreshold = touchThreshold - 1;
+  MPR121.setTouchThreshold(touchThreshold);
+  MPR121.setReleaseThreshold(releaseThreshold);
+}  
+
 int BtUtils::getPinTouchStatus(int *whichTrack) {
 
   if (!MPR121.touchStatusChanged()) {
