@@ -1,0 +1,220 @@
+<html>
+<head>
+  <title>BtUtils - BareTouch board utilities</title>
+  <style>
+    body {font-family:  "Helvetica Neue", Helvetica, Arial, sans-serif; color: #333333;}
+    h1 {font-size: 1.2 em; font-weight: bold; text-align: center;}
+    h2 {font-size: 1.1 em; font-weight: bold; border-bottom: 1px solid grey;}
+    .func {font-weight: bold; font-family: "Courier New"; margin-top: 1em;}
+    .desc {margin-left: 2em; margin-top: 1em;}
+    .example {margin-left: 5em; font-family: "Courier New"; white-space: pre; font-size: 0.9em;}
+    .code {font-family: "Courier New";}
+  </style>
+</head>
+<body>
+
+<h1>BareConductive Touch Board Utility Functions</h1>
+<div style="font-size: 0.8em; text-align: center;">
+  Author: Craig James
+</div>
+
+
+<h2>Introduction</h2>
+<p>
+  These functions "wrap" the complexity of the BareConductive Touch
+  Board<sup>&trade;</sup> into a simple, easy-to-understand set of
+  functions.
+</p>
+<p>
+  A complete working example: File <span class="code">TouchResumeReleaseStop.ino</span>
+</p>
+
+<div class="example">
+#include "BtUtils.h"
+#include &lt;MPR121.h&gt;
+#include &lt;Wire.h&gt;
+#include &lt;SPI.h&gt;
+#include &lt;SdFat.h&gt;
+#include &lt;FreeStack.h&gt; 
+#include &lt;SFEMP3Shield.h&gt;
+SdFat sd;
+SFEMP3Shield MP3player;
+
+BtUtils bt(&sd, &MP3player);
+
+void setup() { }
+
+void loop() {
+  int trackNumber;
+  int touchStatus = bt.getPinTouchStatus(&trackNumber);
+  if (touchStatus = NEW_TOUCH) {
+    int lastPlayed  = bt.getLastTrackPlayed();
+    if (bt.getPlayerStatus() == IS_PAUSED && trackNumber == lastPlayed) {
+      bt.resumeTrack();
+    } else {
+      bt.startTrack(trackNumber);
+    }
+  }
+  else if (touchStatus == NEW_RELEASE) {
+    bt.pauseTrack();
+  } 
+}
+</div>
+
+
+<h2>Touch/Release functions:</h2>
+
+<div class="func">getPinTouchStatus(int *whichTrack)</div>
+<div class="desc">
+  Was a pin touched or released? Returns:
+  <ul>
+    <li><span class="code">TOUCH_NO_CHANGE</span> - nothing happened since the last time this was checked</li>
+    <li><span class="code">NEW_TOUCH</span> - a new pin was touched</li>
+    <li><span class="code">NEW_RELEASE</span> - a pin was released</li>
+  </ul>
+</div>
+<div class="desc">
+  Also returns which track was selected in the "whichTrack" variable you pass in.
+</div>
+<div class="desc">
+  Example:
+</div>
+<div class="example">
+  int whichTrack;
+  int touchStatus = bt.getPinTouchStatus(&whichTrack);
+  if (touchStatus == NEW_TOUCH) {
+    bt.startTrack(whichTrack);
+  } else if (touchStatus == NEW_RELEASE) {
+    bt.stopTrack();
+  }
+</div>
+
+<div class="func">setTouchReleaseThreshold(touchThreshold, releaseThreshold)</div>
+<div class="desc">
+  How sensitive are the touch pins? For example:
+</div>
+<div class="example">
+  bt.setTouchReleaseThreshold(40, 40);  // useful for touch/release sensing
+  bt.setTouchReleaseThreshold(2, 4);            // useful for proximity sensing
+</div>
+<div class="desc">
+  Note that touchThreshold MUST be greater than releaseThreshold. Valid
+  threshold values are 0-255.
+</div>
+
+<h2>Control the player:</h2>
+
+<div class="func">startTrack(trackNumber)</div>
+<div class="desc">
+  Starts a track playing. Normally the sound starts immediately; see
+  <span class="code">setFadeInTime()</span> below to have the sound increase
+  gradually rather than immediately.
+</div>
+
+
+<div class="func">pauseTrack()</div>
+<div class="desc">
+  Pauses the track currently playing.
+</div>
+
+
+<div class="func">resumeTrack()</div>
+<div class="desc">
+  Resumes playing the last track that was paused with <span class="code">pauseTrack()</span>, above.
+  If there was no track paused, starts playing track 0.
+</div>
+
+<div class="func">stopTrack()</div>
+<div class="desc">
+  Stops the current track. Has no effect if nothing is playing.
+</div>
+<div class="desc">
+  If a fade-out time has been specified (see <span class="code">setFadeOutTime()</span>), the track
+  will continue playing during the fade-out period, but during the fade-out
+  period <span class="code">getPlayerStatus</span> (see below) will return IS_STOPPED.
+</div>
+
+<div class="func">queueTrackToStartAfterDelay(int trackNumber)</div>
+<div class="desc">
+  Queues a track that will be started after a delay. This like calling startTrack (above), but the
+  track won't actually start until the start-delay time you've set expires. See
+  <span class="code">setStartDelay()</span>, below.
+</div>
+
+<div class="func">setStartDelay(milliseconds)</div>
+<div class="desc">
+  Specifies how long to wait (in milliseconds) before a queued track begins
+  playing (see <span class="code">queueTrackToStartAfterDelay()</span>, above). This only needs to be
+  called once, for example, in the <span class="code">setup()</span> function of an Arduino program.
+</div>
+
+<div class="func">getPlayerStatus()</div>
+<div class="desc">
+  What is the player doing right now?
+  <ul>
+    <li><span class="code">IS_STOPPED</span> - nothing currently playing or queued</li>
+    <li><span class="code">IS_PLAYING</span> - a track is playing</li>
+    <li><span class="code">IS_PAUSED</span> - a track was started then paused</li>
+    <li><span class="code">IS_WAITING</span> - a track was queued, but the start-delay time hasn't
+    been reached yet.</li>
+  </ul>
+  Note that if a fade-out period has been specified, <span class="code">IS_STOPPED</span> will be returned immediately
+  after <span class="code">stopTrack</span> is called even during the fade-out period.
+</div>
+
+<div class="func">getLastTrackPlayed()</div>
+<div class="desc">
+  Returns the last track played; if you resume, this is what it will play.
+</div>
+
+
+<h2>Volume Control and Fade In/Out:</h2>
+
+<div class="func">setVolume(percent)</div>
+<div class="desc">
+  Sets the volume from 0 to 100%. Note that the BareTouch board has a very
+  wide volume range, and generally a volume less than 50 is
+  inaudible. Default is 100 (full volume).
+</div>
+
+<div class="func">setFadeInTime(milliseconds)</div>
+<div class="desc">
+  Specifies the time (milliseconds) until volume reaches the set value
+  after a track is started. Default is zero (track starts at full specified
+  volume). This only needs to be called once, for example, in the <span class="code">setup()</span>
+  function of an Arduino program.
+</div>
+
+<div class="func">setFadeOutTime(milliseconds)</div>
+<div class="desc">
+  Specifies the time (milliseconds) until the volume reaches zero after a
+  track is stopped. Default is zero (track stops playing immediately when
+  stopTrack is called). This only needs to be called once, for example, in
+  the <span class="code">setup()</span> function of an Arduino program.
+</div>
+
+<h2>Bookkeeping task:</h2>
+
+<div class="func">doTimerTasks()</div>
+<div class="desc">
+  Timer tasks. If you're using the fade-in/fade-out feature, or if you're
+  using the queue-track feature, you should call this function every time
+  through the loop.
+</div>
+
+<h2>Handy utility functions:</h2>
+
+<div class="func">log_action(char *msg, int track)</div>
+<div class="desc">
+  Handy utility: prints the message followed by the track number
+</div>
+
+<div class="func">void turnLedOn()</div>
+<div class="desc">
+  Handy utility: turn the built-in LED on.
+</div>
+
+<div class="func">void turnLedOff()</div>
+<div class="desc">
+  Handy utility: turn the built-in LED off.
+</div>

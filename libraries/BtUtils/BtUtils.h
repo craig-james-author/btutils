@@ -38,40 +38,49 @@ class BtUtils
  public:
 
   BtUtils(SdFat*, SFEMP3Shield*);
-
-  void log_action(char *msg, int track);
-  void turnLedOn();
-  void turnLedOff();
-  int  getPinTouchStatus(int *whichTrack);
+  static BtUtils* setup(SdFat*, SFEMP3Shield*);
+  static void log_action(char *msg, int track);
+  static void turnLedOn();
+  static void turnLedOff();
   void doTimerTasks();
 
+  int  getPinTouchStatus(int *whichTrack);
   void setTouchReleaseThreshold(int touchThreshold, int releaseThreshold);
-				// e.g. 40/20 for touch, 4/2 for proximity
+
   void setVolume(int percent);
   void setFadeInTime(int milliseconds);
+  void setFadeOutTime(int milliseconds);
 
   int  getPlayerStatus();
   int  getLastTrackPlayed();
-  void queueTrackToStartAfterDelay(int trackNumber);
+
   void startTrack(int trackNumber);
   void resumeTrack();
   void pauseTrack();
   void stopTrack();
+
+
   void setStartDelay(int milliseconds);
+  void queueTrackToStartAfterDelay(int trackNumber);
 
  private:
-  int playerStatus;
-  int lastTrackPlayed;
-  unsigned long lastStartTime;
-  unsigned long startDelay;
-  int currentVolume;
-  int fadeInTime;
+  int _playerStatus;
+  int _lastTrackPlayed;
+  unsigned long _lastStartTime;
+  unsigned long _lastStopTime;
+  unsigned long _startDelay;
+  int _targetVolume;
+  int _actualVolume;
+  int _fadeInTime;
+  int _fadeOutTime;
+  SdFat *_sd;
+  SFEMP3Shield *_MP3player;
 
-  SdFat *sd;
-  SFEMP3Shield *MP3player;
-
-  void increaseVolume();
-  void startIfTimeoutReached();
+  uint8_t _volumnPctToByte(int percent);
+  void _setActualVolume(int percent);
+  void _doVolumeFadeIn();
+  void _doVolumeFadeOut();
+  void _startTrackIfStartDelayReached();
 };
 
 #endif

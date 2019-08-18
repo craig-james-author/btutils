@@ -15,6 +15,7 @@ SFEMP3Shield MP3player;
 BtUtils bt(&sd, &MP3player);
 
 void setup() {
+  BtUtils::setup(&sd, &MP3player);
 }
 
 void loop() {
@@ -22,7 +23,7 @@ void loop() {
   int trackNumber;
   int touchStatus = bt.getPinTouchStatus(&trackNumber);
 
-  if (touchStatus = NEW_TOUCH) {
+  if (touchStatus == NEW_TOUCH) {
     bt.startTrack(trackNumber);
   }
   else if (touchStatus == NEW_RELEASE) {
