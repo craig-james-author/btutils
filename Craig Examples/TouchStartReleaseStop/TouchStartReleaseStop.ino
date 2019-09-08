@@ -1,5 +1,3 @@
-/* -*-C++-*- */
-
 #include "Compiler_Errors.h"
 #include "BtUtils.h"
 #include <MPR121.h>
@@ -12,21 +10,23 @@
 SdFat sd;
 SFEMP3Shield MP3player;
 
-BtUtils bt(&sd, &MP3player);
+BtUtils *bt;
 
 void setup() {
-  bt.setTouchReleaseThreshold(4, 2);
+  bt = BtUtils::setup(&sd, &MP3player);
 }
 
 void loop() {
 
   int trackNumber;
-  int touchStatus = bt.getPinTouchStatus(&trackNumber);
+  int touchStatus = bt->getPinTouchStatus(&trackNumber);
 
-  if (touchStatus = NEW_TOUCH) {
-    bt.startTrack(trackNumber);
+  // Plays while being touched, stops when released. Each track starts at the beginning.
+
+  if (touchStatus == NEW_TOUCH) {
+    bt->startTrack(trackNumber);
   }
   else if (touchStatus == NEW_RELEASE) {
-    bt.stopTrack();
+    bt->stopTrack();
   } 
 }

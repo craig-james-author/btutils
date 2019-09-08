@@ -59,9 +59,13 @@ class BtUtils
   void pauseTrack();
   void stopTrack();
 
+  void startOverAfterNoTouchTime(int seconds);
 
   void setStartDelay(int milliseconds);
   void queueTrackToStartAfterDelay(int trackNumber);
+
+  void setProximitySensingMode();
+  int getProximityPercent(int pinNumber);
 
  private:
   int _playerStatus;
@@ -69,10 +73,14 @@ class BtUtils
   unsigned long _lastStartTime;
   unsigned long _lastStopTime;
   unsigned long _startDelay;
+  unsigned long _lastActionTime;
+  unsigned long _startOverIfIdleTime;
   int _targetVolume;
   int _actualVolume;
   int _fadeInTime;
   int _fadeOutTime;
+  float _lastProximity;
+  int _proximityPinNumber;
   SdFat *_sd;
   SFEMP3Shield *_MP3player;
 
