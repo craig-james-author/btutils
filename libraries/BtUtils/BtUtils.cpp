@@ -1,4 +1,28 @@
-/* -*-C++-*- */
+/* -*-C++-*-
++======================================================================
+| Copyright (c) 2019, Craig A. James
+|
+| Permission is hereby granted, free of charge, to any person obtaining a
+| copy of this software and associated documentation files (the
+| "Software"), to deal in the Software without restriction, including
+| without limitation the rights to use, copy, modify, merge, publish,
+| distribute, sublicense, and/or sell copies of the Software, and to permit
+| persons to whom the Software is furnished to do so, subject to the
+| following conditions:
+|
+| The above copyright notice and this permission notice shall be included
+| in all copies or substantial portions of the Software.
+|
+| THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+| OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+| MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+| NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+| DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+| OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+| USE OR OTHER DEALINGS IN THE SOFTWARE.
+
++======================================================================
+*/
 
 #include "Arduino.h"
 #include "BtUtils.h"
@@ -106,19 +130,15 @@ void BtUtils::setTouchReleaseThreshold(int touchThreshold, int releaseThreshold)
 
 int BtUtils::getPinTouchStatus(int *whichTrack) {
 
-  if (!MPR121.touchStatusChanged()) {
-    *whichTrack = -1;
-    return TOUCH_NO_CHANGE;
-  }
-
-  MPR121.updateTouchData();
-  if (MPR121.getNumTouches() > 1) {    // Ignore when two or more pins touched
-    *whichTrack = -1;
-    return TOUCH_NO_CHANGE;
-  }
-
   *whichTrack = -1;
   int pinStatus = TOUCH_NO_CHANGE;
+
+  if (!MPR121.touchStatusChanged())
+    return pinStatus;
+
+  MPR121.updateTouchData();
+  if (MPR121.getNumTouches() > 1)     // Ignore when two or more pins touched
+    return pinStatus;
 
   // Loop over pins, find the one that was touched. Note that we don't end
   // the loop even if we find one; we test all of the pins. This seems to
@@ -178,7 +198,6 @@ int BtUtils::getProximityPercent(int pinNumber) {
 
   return thisProximity;
 }
-
 
 
 /*----------------------------------------------------------------------
@@ -356,12 +375,16 @@ void BtUtils::stopTrack() {
   } else {
     _MP3player->stopTrack();
   }
-  _lastActionTime = _lastTrackPlayed;
+  _lastActionTime = _lastStopTime;
 }
 
 void BtUtils::startOverAfterNoTouchTime(int seconds) {
   log_action("startOverAfterNoTouchTime = ", seconds);
-  _startOverIfIdleTime = (unsigned long)seconds * 1000;
+  if (seconds < 0) {
+    _startOverIfIdleTime = -1;
+  } else {
+    _startOverIfIdleTime = (unsigned long)seconds * 1000;
+  }
 }
 
 

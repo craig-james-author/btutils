@@ -210,14 +210,33 @@ void loop() {
     <li><span class="code">IS_WAITING</span> - a track was queued, but the start-delay time hasn't
     been reached yet.</li>
   </ul>
-  Note that if a fade-out period has been specified, <span class="code">IS_STOPPED</span> will be returned immediately
-  after <span class="code">stopTrack</span> is called even during the fade-out period.
+
+  Note that if a fade-out period has been
+  specified, <span class="code">IS_STOPPED</span> will be returned immediately
+  after <span class="code">stopTrack</span> is called even during the fade-out
+  period.
+
+</div>
+
+<div class="func">bt-&gt;startOverAfterNoTouchTime(int seconds)</div>
+<div class="desc">
+  If there is no activity for this length of time, resets
+  the <span class="code">resumeTrack()</span> feature so that the next touch
+  will start playing from the beginning of the track rather than resuming. The
+  idea is that when there's a long gap in activity, it's probably a different
+  person, so we should start fresh.
+</div>
+<div class="desc">
+  The default is -1, which disables this feature
+  (<span class="code">resumeTrack()</span> always resumes, even after a long
+  period of no activity).
 </div>
 
 <div class="func">bt-&gt;getLastTrackPlayed()</div>
 <div class="desc">
   Returns the last track played; if you resume, this is what it will play.
 </div>
+
 
 
 <h2>Volume Control and Fade In/Out:</h2>
@@ -277,7 +296,11 @@ void loop() {
 
 <div class="func">bt-&gt;log_action(char *msg, int track)</div>
 <div class="desc">
-  Handy utility: prints the message followed by the track number
+  Handy utility: prints the message followed by the track number.
+  <i>(Note: you can also use the
+  standard <span class="code">Serial.print</span>
+  and <span class="code">Serial.println</span> just as in any Arduino
+  sketch. This function is merely for convenience for simple logging.)</i>
 </div>
 
 <div class="func">bt-&gt;void turnLedOn()</div>
