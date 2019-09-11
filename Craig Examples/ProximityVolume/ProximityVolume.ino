@@ -14,10 +14,8 @@ BtUtils *bt;
 void setup() {
   bt = BtUtils::setup(&sd, &MP3player);
 
-  // Set up the TouchBoard for proximity sensing. Only one pin is used for
-  // proximity sensing; this specifies which pin to use.
-
-  bt->setProximitySensingPinNumber(0);    // pin zero
+  // Set up the TouchBoard for proximity sensing.
+  bt->setProximitySensingMode();
 
   // Set the volume to zero initially so that nothing sounds until
   // your hand gets near the proximity pin (pin zero that we set above).
@@ -55,7 +53,7 @@ void loop() {
   // anything.
 
   if (bt->getPlayerStatus() == IS_PLAYING) {
-    int proximity = bt->getProximityPercent();
+    int proximity = bt->getProximityPercent(FIRST_PIN);
     bt->setVolume(proximity);
   }
 

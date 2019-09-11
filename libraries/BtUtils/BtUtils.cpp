@@ -174,9 +174,9 @@ int BtUtils::getProximityPercent(int pinNumber) {
   _lastProximity = (filterWeight*_lastProximity) + ((1-filterWeight)*(float)prox);
 
   // map the LOW_DIFF..HIGH_DIFF range to 0..100 (percentage)
-  int thisOutput = (int)map(_lastProximity, LOW_DIFF, HIGH_DIFF, 0, 100);
+  int thisProximity = map(_lastProximity, LOW_DIFF, HIGH_DIFF, 0, 100);
 
-  return thisOutput;
+  return thisProximity;
 }
 
 
