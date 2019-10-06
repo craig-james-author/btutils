@@ -17,11 +17,11 @@ void setup() {
   // Set the fade-in time in milliseconds (e.g. 1000 is 1 second). When a track is started,
   // the volume is initially zero, and it takes this much time to reach full volume.
 
-  bt->setFadeInTime(2000);    // 1 second fade-in
+  bt->setFadeInTime(2000);    // 2 second fade-in
 
   // Same for the fade-out time.
 
-  bt->setFadeOutTime(1000);   // 2 second fade-out
+  bt->setFadeOutTime(1000);   // 1 second fade-out
 }
 
 
