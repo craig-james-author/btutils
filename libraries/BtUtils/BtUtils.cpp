@@ -143,7 +143,7 @@ int BtUtils::getPinTouchStatus(int *whichTrack) {
   // Loop over pins, find the one that was touched. Note that we don't end
   // the loop even if we find one; we test all of the pins. This seems to
   // be necessary so that isNewTouch() returns correctly the next time we try.
-  for (int i = FIRST_PIN; i < LAST_PIN; i++) {
+  for (int i = FIRST_PIN; i <= LAST_PIN; i++) {
     if (MPR121.isNewTouch(i)) {
       *whichTrack = i - FIRST_PIN;
       pinStatus = NEW_TOUCH;

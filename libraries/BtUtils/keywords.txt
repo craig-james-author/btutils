@@ -14,3 +14,4 @@ startTrack	KEYWORD2
 resumeTrack	KEYWORD2
 pauseTrack	KEYWORD2
 setStartDelay	KEYWORD2
+startOverAfterNoTouchTime	KEYWORD2
