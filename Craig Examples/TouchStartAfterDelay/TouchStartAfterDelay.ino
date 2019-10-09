@@ -14,10 +14,35 @@ BtUtils *bt;
 void setup() {
   bt = BtUtils::setup(&sd, &MP3player);
 
-  // Set the delay time in milliseconds (e.g. 1000 is 1 second). When a track is started,
-  // the actual sound won't start until this time has elapsed.
+  // This sets an "idle timeout" -- if nothing hapens for this length of time,
+  // it clears out the "resume" feature so that the next time you call
+  // bt->resume(), it will start the track over instead of resuming.  The
+  // timeout is in seconds.
+
+  // bt->startOverAfterNoTouchTime(30);
+
+
+  // Set the delay time in milliseconds (e.g. 1000 is 1 second). When a track
+  // is started, the actual sound won't start until this time has elapsed.
 
   bt->setStartDelay(1500);
+
+
+  // Set the output volume (left and right). This ranges from zero (silent) to
+  // 100 (full volume).  The default is 100 (i.e. if you don't call this
+  // function at all, the volume will be 100%).
+
+  // bt->setVolume(100, 100);
+
+
+  // Set the touch sensitivity. Low values make it very sensitive (i.e. it
+  // will trigger a touch even when your hand is nearby), and high valuse
+  // make it less sensitive (i.e. you have to actually touch the contact).
+  // The first number is touch, the second number is release. Touch <i>must</i>
+  // be greater than release.
+
+  // bt->setTouchReleaseThreshold(40, 20);
+
 }
 
 void loop() {
