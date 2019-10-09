@@ -14,6 +14,15 @@ BtUtils *bt;
 
 void setup() {
   bt = BtUtils::setup(&sd, &MP3player);
+
+  // Set the touch sensitivity. Low values make it very sensitive (i.e. it
+  // will trigger a touch even when your hand is nearby), and high valuse
+  // make it less sensitive (i.e. you have to actually touch the contact).
+  // The first number is touch, the second number is release. Touch <i>must</i>
+  // be greater than release.
+
+  bt->setTouchReleaseThreshold(10, 5);
+
 }
 
 void loop() {

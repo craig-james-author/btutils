@@ -47,6 +47,8 @@ BtUtils::BtUtils(SdFat *sd_in, SFEMP3Shield *MP3player_in) {
   _actualVolume        = 100;
   _fadeInTime          = 0;
   _fadeOutTime         = 0;
+  _thisFadeInTime      = 0;
+  _thisFadeOutTime     = 0;
   _lastProximity       = 0.0;
   _proximityPinNumber  = 0;
 
@@ -95,8 +97,10 @@ BtUtils* BtUtils::setup(SdFat *sd, SFEMP3Shield *MP3player) {
  ----------------------------------------------------------------------*/
 
 void BtUtils::log_action(char *msg, int track) {
+#ifdef DEBUG
   Serial.print(msg);
   Serial.println(track);
+#endif
 }
 
 void BtUtils::turnLedOn() {
@@ -124,8 +128,8 @@ void BtUtils::setTouchReleaseThreshold(int touchThreshold, int releaseThreshold)
 
   MPR121.setTouchThreshold(touchThreshold);
   MPR121.setReleaseThreshold(releaseThreshold);
-  log_action("Touch threshold: ", touchThreshold);
-  log_action("Release threshold: ", releaseThreshold);
+  LOG_ACTION("Touch threshold: ", touchThreshold);
+  LOG_ACTION("Release threshold: ", releaseThreshold);
 }  
 
 int BtUtils::getPinTouchStatus(int *whichTrack) {
@@ -147,13 +151,13 @@ int BtUtils::getPinTouchStatus(int *whichTrack) {
     if (MPR121.isNewTouch(i)) {
       *whichTrack = i - FIRST_PIN;
       pinStatus = NEW_TOUCH;
-      log_action("pin touched: ", i);
+      LOG_ACTION("pin touched: ", i);
       turnLedOn();
     }
     else if (MPR121.isNewRelease(i)){
       *whichTrack = i - FIRST_PIN;
       pinStatus = NEW_RELEASE;
-      log_action("pin released: ", i);
+      LOG_ACTION("pin released: ", i);
       turnLedOff();
     }
   }
@@ -210,7 +214,7 @@ int BtUtils::getProximityPercent(int pinNumber) {
 // (offset and scaled so that zero is zero and 100 is max) reverses this a
 // bit, making it sound more linear.
 
-uint8_t BtUtils::_volumnPctToByte(int percent) {
+uint8_t BtUtils::_volumePctToByte(int percent) {
   if (percent > 100)	// max volume
     percent = 100;
   else if (percent < 0) // min volume
@@ -218,81 +222,117 @@ uint8_t BtUtils::_volumnPctToByte(int percent) {
   float p = (float)percent/100.0;
   p = (1 - (1/(pow(10.0*(p+0.1), 1.5))))/0.974;
   uint8_t b = ((1.0 - p) * 254.0);
-  log_action("_volumnPctToByte percent: ", percent);
-  log_action("_volumnPctToByte byte:    ", b);
+  LOG_ACTION("_volumePctToByte percent: ", percent);
+  LOG_ACTION("_volumePctToByte byte:    ", b);
   return b;
 }
 
 void BtUtils::_setActualVolume(int percent) {
-  uint8_t volume = _volumnPctToByte(percent);
+  uint8_t volume = _volumePctToByte(percent);
   _MP3player->setVolume(volume);
   _actualVolume = percent;
 }
 
 void BtUtils::setVolume(int percent) {
-  log_action("set volume set: ", percent);
+  LOG_ACTION("set volume set: ", percent);
   _targetVolume = percent;
   _setActualVolume(percent);
 }
 
 void BtUtils::setFadeInTime(int milliseconds) {
+#ifdef BTUTILS_ENABLE_FADES
   _fadeInTime = milliseconds;
+#endif
 }
 
 void BtUtils::setFadeOutTime(int milliseconds) {
+#ifdef BTUTILS_ENABLE_FADES
   _fadeOutTime = milliseconds;
+#endif
 }
 
-void BtUtils::_doVolumeFadeIn() {
-
-  // Ignore if not playing, no fade-in specified, or if we've finished the fade-in
-
-  if (!_fadeInTime || _playerStatus != IS_PLAYING || _actualVolume >= _targetVolume) {
-    return;
+int BtUtils::_calculateFadeTime(bool goingUp) {
+#ifdef BTUTILS_ENABLE_FADES
+  int deltaVolume;
+  int fadeTime;
+  if (goingUp) {
+    deltaVolume = 100 - _actualVolume;
+    fadeTime = _fadeInTime;
+  } else {
+    deltaVolume = _actualVolume;
+    fadeTime = _fadeOutTime;
   }
-  
-  // Calculate the target volume based on how much elapsed time since the track started playing.
-
-  float timeToMax = _fadeInTime == 0 ? 1.0 : (float)_fadeInTime;        // avoid divide-by-zero error
-  unsigned long elapsedTime = millis() - _lastStartTime;
-
-  int newVolumePercent = int((float)_targetVolume*(float)elapsedTime/timeToMax);
-
-  // Time to increase volume?
-
-  if (newVolumePercent != _actualVolume) {
-    if (newVolumePercent >= _targetVolume) {
-      newVolumePercent = _targetVolume;
-    }
-    _actualVolume = newVolumePercent;
-    _MP3player->setVolume(_volumnPctToByte(_actualVolume));
-  }
+  int time = (int)(0.499 + (float)fadeTime * (float)deltaVolume/100.0);
+  return time;
+#else
+  return 0;
+#endif
 }
 
-void BtUtils::_doVolumeFadeOut() {
 
-  // Ignore if not stopped, no fade-out specified, or we've finished the fade-out
-  if (_playerStatus != IS_STOPPED || _fadeOutTime == 0 ||_actualVolume == 0) {
-    return;
-  }
+void BtUtils::_doVolumeFadeInAndOut() {
 
-  // Calculate the target volume based on how much elapsed time since the track stopped playing.
+#ifdef BTUTILS_ENABLE_FADES
 
-  float timeToMin = _fadeOutTime == 0 ? 1.0 : (float)_fadeOutTime;      // avoid divide-by-zero error
-  unsigned long elapsedTime = millis() - _lastStopTime;
+  // Do fade-in?
 
-  int newVolumePercent = _targetVolume - int((float)(_targetVolume)*(float)elapsedTime/timeToMin);
+  if (_lastStartTime > 0 && _fadeInTime != 0 && _playerStatus == IS_PLAYING && _actualVolume < _targetVolume) {
 
-  // Time to decrease volume?
+    // Calculate the target volume based on how much elapsed time since the track started playing.
+    // But if _thisFadeInTime is different that _fadeInTime, it means we started with non-zero
+    // volume, so push the elapsed time forward by difference of the two.
 
-  if (newVolumePercent != _actualVolume) {
-    if (newVolumePercent < 0) {
-      newVolumePercent = 0;
-      _MP3player->stopTrack();
+    unsigned long elapsedTime = millis() - _lastStartTime;
+    if (_fadeInTime != _thisFadeInTime) {
+      elapsedTime += _fadeInTime - _thisFadeInTime;	// push elapsed time forward to adjust for non-zero start volume
     }
-    _actualVolume = newVolumePercent;
-    _MP3player->setVolume(_volumnPctToByte(_actualVolume));
+    
+    int newVolumePercent = int((float)_targetVolume*(float)elapsedTime/(float)_fadeInTime);
+    
+    // Time to increase volume?
+    
+    if (newVolumePercent != _actualVolume) {
+      if (newVolumePercent >= _targetVolume) {
+	newVolumePercent = _targetVolume;
+      }
+      _setActualVolume(newVolumePercent);
+    }
   }
+
+  // Else -- do fade-out?
+
+  else if (_lastStopTime > 0 && (_playerStatus == IS_STOPPED || _playerStatus == IS_PAUSED)
+	   && _fadeOutTime != 0 && _actualVolume > 0) {
+
+    // Calculate the target volume based on how much elapsed time since the track stopped playing.
+    // But if _thisFadeOutTime is different than _fadeOutTime, it means we started with volume less
+    // than 100%, so push elapsed time forward by the difference of the two.
+
+    unsigned long elapsedTime = millis() - _lastStopTime;
+    if (_fadeOutTime != _thisFadeOutTime) {
+      elapsedTime += _fadeOutTime - _thisFadeOutTime;
+    }
+
+    int newVolumePercent = _targetVolume - int((float)(_targetVolume)*(float)elapsedTime/(float)_fadeOutTime);
+
+    // Time to decrease volume?
+
+    if (newVolumePercent != _actualVolume) {
+      if (newVolumePercent < 0) {
+	newVolumePercent = 0;
+	if (_playerStatus == IS_PAUSED) {
+	  _MP3player->pauseMusic();
+	  LOG_ACTION("fade-out done, music paused, track ", _lastTrackPlayed);
+	} else {
+	  _MP3player->stopTrack();
+	}
+      }
+      _setActualVolume(newVolumePercent);
+    }
+  }
+#else
+  _setActualVolume(_targetVolume);
+#endif
 }
 
 /*----------------------------------------------------------------------
@@ -300,9 +340,9 @@ void BtUtils::_doVolumeFadeOut() {
  ----------------------------------------------------------------------*/
 
 int BtUtils::getPlayerStatus() {
-  if (_playerStatus == IS_PLAYING && _MP3player->isPlaying() != 1) {
+  if ((_playerStatus == IS_PLAYING || _playerStatus == IS_PAUSED) && _MP3player->isPlaying() != 1) {
     _playerStatus = IS_STOPPED;
-    log_action("player finished track: ", _lastTrackPlayed);
+    LOG_ACTION("player finished track: ", _lastTrackPlayed);
   }
   return _playerStatus;
 }
@@ -312,20 +352,22 @@ int BtUtils::getLastTrackPlayed() {
 }
 
 void BtUtils::queueTrackToStartAfterDelay(int trackNumber) {
-  log_action("queue track, waiting for timeout, track ", trackNumber);
+  LOG_ACTION("queue track, waiting for timeout, track ", trackNumber);
   if (_MP3player->isPlaying()) {
     _MP3player->stopTrack();
   }
   _lastTrackPlayed = trackNumber;
   _lastStartTime = millis();
+  _lastStopTime = 0;
   _lastActionTime = _lastStartTime;
   _playerStatus = IS_WAITING;
 }
 
 void BtUtils::startTrack(int trackNumber) {
-  log_action("start track ", trackNumber);
+  LOG_ACTION("start track ", trackNumber);
   if (_fadeInTime > 0) {
     _setActualVolume(0);       // fade-in: start with zero
+    _thisFadeInTime = _fadeInTime;
   } else {
     setVolume(_targetVolume);   // normal: start with full requested volume
   }
@@ -335,43 +377,53 @@ void BtUtils::startTrack(int trackNumber) {
   _MP3player->playTrack(trackNumber);
   _lastTrackPlayed = trackNumber;
   _lastStartTime = millis();
+  _lastStopTime = 0;
   _lastActionTime = _lastStartTime;
   _playerStatus = IS_PLAYING;
 }
 
 void BtUtils::resumeTrack() {
-  log_action("resume track ", _lastTrackPlayed);
+  LOG_ACTION("resume track ", _lastTrackPlayed);
   if (_lastTrackPlayed < 0) {
     startTrack(0);
-  } else {
-    if (_lastActionTime > 0 && _startOverIfIdleTime > 0) {
-      unsigned long lastActionElapsed = millis() - _lastActionTime;
-      if (lastActionElapsed >= _startOverIfIdleTime) {
-	log_action("startOverIfIdleTime exceeded, restarting track: ", _lastTrackPlayed);
-	startTrack(_lastTrackPlayed);
-	return;
-      }
+  } else if (_lastActionTime > 0 && _startOverIfIdleTime > 0) {
+    unsigned long lastActionElapsed = millis() - _lastActionTime;
+    if (lastActionElapsed >= _startOverIfIdleTime) {
+      LOG_ACTION("startOverIfIdleTime exceeded, restarting track: ", _lastTrackPlayed);
+      startTrack(_lastTrackPlayed);
+      return;
     }
-    _MP3player->resumeMusic();
-    _playerStatus = IS_PLAYING;
   }
+  LOG_ACTION("resume track: resume player, ", _lastTrackPlayed);
+  _MP3player->resumeMusic();
+  _playerStatus = IS_PLAYING;
+  _thisFadeInTime = _calculateFadeTime(true);
+  _lastStartTime = millis();
+  _lastStopTime = 0;
   _lastActionTime = millis();
 }
 
 void BtUtils::pauseTrack() {
-  log_action("pause track ", _lastTrackPlayed);
-  _MP3player->pauseMusic();
-  _playerStatus = IS_PAUSED;
+  LOG_ACTION("pause track ", _lastTrackPlayed);
+  if (_fadeOutTime == 0) {
+    _MP3player->pauseMusic();
+  } else {
+    _thisFadeOutTime = _calculateFadeTime(false);
+    _lastStopTime = millis();
+    _lastStartTime = 0;
+  }
   _lastActionTime = millis();
+  _playerStatus = IS_PAUSED;
 }
 
 void BtUtils::stopTrack() {
-  log_action("stop track ", _lastTrackPlayed);
+  LOG_ACTION("stop track ", _lastTrackPlayed);
   _playerStatus = IS_STOPPED;
   _lastTrackPlayed = -1;
-  _lastStopTime = millis();
   if (_fadeOutTime > 0) {
+    _thisFadeOutTime = _calculateFadeTime(false);
     _lastStopTime = millis();
+    _lastStartTime = 0;
   } else {
     _MP3player->stopTrack();
   }
@@ -379,7 +431,7 @@ void BtUtils::stopTrack() {
 }
 
 void BtUtils::startOverAfterNoTouchTime(int seconds) {
-  log_action("startOverAfterNoTouchTime = ", seconds);
+  LOG_ACTION("startOverAfterNoTouchTime = ", seconds);
   if (seconds < 0) {
     _startOverIfIdleTime = -1;
   } else {
@@ -400,7 +452,7 @@ void BtUtils::_startTrackIfStartDelayReached() {
   if (elapsedTime < _startDelay) {
     return;
   }
-  log_action("wait time (milliseconds) completed: ", _startDelay);
+  LOG_ACTION("wait time (milliseconds) completed: ", _startDelay);
   startTrack(_lastTrackPlayed);
 }
 
@@ -410,6 +462,5 @@ void BtUtils::doTimerTasks() {
   // or to start a time-delayed track
 
   _startTrackIfStartDelayReached();
-  _doVolumeFadeIn();
-  _doVolumeFadeOut();
+  _doVolumeFadeInAndOut();
 }

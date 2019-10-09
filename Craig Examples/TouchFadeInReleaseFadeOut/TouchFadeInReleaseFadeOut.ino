@@ -21,7 +21,7 @@ void setup() {
 
   // Same for the fade-out time.
 
-  bt->setFadeOutTime(1000);   // 1 second fade-out
+  bt->setFadeOutTime(2000);   // 2 second fade-out
 }
 
 
@@ -30,13 +30,23 @@ void loop() {
   int trackNumber;
   int touchStatus = bt->getPinTouchStatus(&trackNumber);
 
-  // Plays while being touched, stops when released. Each track starts at the beginning.
+  // If a new touch is detected:
+  //   - if it's the same track as before, resume playing where it left off.
+  //   - if it's a different track, start it from the beginning.
 
   if (touchStatus == NEW_TOUCH) {
-    bt->startTrack(trackNumber);
+    int lastPlayed  = bt->getLastTrackPlayed();
+    if (bt->getPlayerStatus() == IS_PAUSED && trackNumber == lastPlayed) {
+      bt->resumeTrack();
+    } else {
+      bt->startTrack(trackNumber);
+    }
   }
+
+  // Pause the track as soon as the release is detected.
+
   else if (touchStatus == NEW_RELEASE) {
-    bt->stopTrack();
+    bt->pauseTrack();
   } 
 
   bt->doTimerTasks();

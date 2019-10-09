@@ -33,6 +33,15 @@
 #define NEW_TOUCH 1
 #define NEW_RELEASE 2
 
+// Debugging: enable/disable logging
+#ifdef DEBUG
+#define LOG_ACTION log_action
+#else
+#define LOG_ACTION(A,B)
+#endif
+
+#define BTUTILS_ENABLE_FADES 1
+
 class BtUtils
 {
  public:
@@ -48,6 +57,7 @@ class BtUtils
   void setTouchReleaseThreshold(int touchThreshold, int releaseThreshold);
 
   void setVolume(int percent);
+  void setVolume(int leftPercent, int rightPercent);
   void setFadeInTime(int milliseconds);
   void setFadeOutTime(int milliseconds);
 
@@ -79,15 +89,17 @@ class BtUtils
   int _actualVolume;
   int _fadeInTime;
   int _fadeOutTime;
+  int _thisFadeInTime;
+  int _thisFadeOutTime;
   float _lastProximity;
   int _proximityPinNumber;
   SdFat *_sd;
   SFEMP3Shield *_MP3player;
 
-  uint8_t _volumnPctToByte(int percent);
+  uint8_t _volumePctToByte(int percent);
   void _setActualVolume(int percent);
-  void _doVolumeFadeIn();
-  void _doVolumeFadeOut();
+  int  _calculateFadeTime(bool goingUp);
+  void _doVolumeFadeInAndOut();
   void _startTrackIfStartDelayReached();
 };
 
