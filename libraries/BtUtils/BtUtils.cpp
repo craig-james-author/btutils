@@ -233,10 +233,14 @@ void BtUtils::_setActualVolume(int percent) {
   _actualVolume = percent;
 }
 
+void BtUtils::setVolume(int leftPercent, int rightPercent) {
+  LOG_ACTION("set volume set: ", leftPercent);
+  _targetVolume = leftPercent;
+  _setActualVolume(leftPercent);
+}
+
 void BtUtils::setVolume(int percent) {
-  LOG_ACTION("set volume set: ", percent);
-  _targetVolume = percent;
-  _setActualVolume(percent);
+  setVolume(percent, percent);
 }
 
 void BtUtils::setFadeInTime(int milliseconds) {
