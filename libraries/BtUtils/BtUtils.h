@@ -63,8 +63,9 @@ class BtUtils
 
   int  getPlayerStatus();
   int  getLastTrackPlayed();
+  uint32_t getCurrentTrackLocation();
 
-  void startTrack(int trackNumber);
+  void startTrack(int trackNumber, uint32_t location = 0);
   void resumeTrack();
   void pauseTrack();
   void stopTrack();

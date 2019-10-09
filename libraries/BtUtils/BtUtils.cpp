@@ -97,10 +97,8 @@ BtUtils* BtUtils::setup(SdFat *sd, SFEMP3Shield *MP3player) {
  ----------------------------------------------------------------------*/
 
 void BtUtils::log_action(char *msg, int track) {
-#ifdef DEBUG
   Serial.print(msg);
   Serial.println(track);
-#endif
 }
 
 void BtUtils::turnLedOn() {
@@ -351,6 +349,15 @@ int BtUtils::getLastTrackPlayed() {
   return _lastTrackPlayed;
 }
 
+uint32_t BtUtils::getCurrentTrackLocation() {
+  int status = getPlayerStatus();
+  if (status == IS_PLAYING || status == IS_PAUSED) {
+    return _MP3player->currentPosition();
+  }
+  return 0;
+}
+
+
 void BtUtils::queueTrackToStartAfterDelay(int trackNumber) {
   LOG_ACTION("queue track, waiting for timeout, track ", trackNumber);
   if (_MP3player->isPlaying()) {
@@ -363,7 +370,7 @@ void BtUtils::queueTrackToStartAfterDelay(int trackNumber) {
   _playerStatus = IS_WAITING;
 }
 
-void BtUtils::startTrack(int trackNumber) {
+void BtUtils::startTrack(int trackNumber, uint32_t location) {
   LOG_ACTION("start track ", trackNumber);
   if (_fadeInTime > 0) {
     _setActualVolume(0);       // fade-in: start with zero
@@ -375,6 +382,19 @@ void BtUtils::startTrack(int trackNumber) {
     _MP3player->stopTrack();
   }
   _MP3player->playTrack(trackNumber);
+  if (location) {
+    int saveActualVolume = _actualVolume;
+    _setActualVolume(0);
+    // Note to self: This skipTo() feature just doesn't work. It has to have been playing
+    // for at least 1 second or thereabouts before the MP3 player knows where it is; prior
+    // to that it just ignores the skipTo() function. Not only that, but once you do skipTo(),
+    // subsequent getCurrentTrackLocation() calls return the DIFFERENCE from where you last
+    // started, not the actual location! So this one-second delay is necessary, and basically
+    // makes the feature useless.
+    delay(1000);
+    _MP3player->skipTo(location);
+    _setActualVolume(saveActualVolume);
+  }
   _lastTrackPlayed = trackNumber;
   _lastStartTime = millis();
   _lastStopTime = 0;
