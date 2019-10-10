@@ -387,8 +387,6 @@ void BtUtils::startTrack(int trackNumber, uint32_t location) {
   }
   _MP3player->playTrack(trackNumber);
   if (location) {
-    int saveActualVolume = _actualVolume;
-    _setActualVolume(0);
     // Note to self: This skipTo() feature just doesn't work. It has to have been playing
     // for at least 1 second or thereabouts before the MP3 player knows where it is; prior
     // to that it just ignores the skipTo() function. Not only that, but once you do skipTo(),
@@ -397,7 +395,6 @@ void BtUtils::startTrack(int trackNumber, uint32_t location) {
     // makes the feature useless.
     delay(1000);
     _MP3player->skipTo(location);
-    _setActualVolume(saveActualVolume);
   }
   _lastTrackPlayed = trackNumber;
   _lastStartTime = millis();
