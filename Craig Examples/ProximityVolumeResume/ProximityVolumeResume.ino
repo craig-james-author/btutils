@@ -1,3 +1,5 @@
+// Proximity changes volume; the track resumes in place.
+
 #include "BtUtils.h"
 #include <MPR121.h>
 #include <Wire.h>
@@ -19,6 +21,17 @@ void setup() {
   // movements are detected correctly.
 
   bt->setProximitySensingMode();
+
+  // Change the proximity sensitivity. The default (if you don't do this)
+  // is 1.3. If you increase it (say by setting it to 2.0), the volume will
+  // increase more rapidly as your hand gets near the sensor. If you
+  // decrease it (say to 0.5), the volume will increase more
+  // slowly. Additionally, values lower than 1.3 will limit the total
+  // volume. A value of one means the maximum volume is around 70%. A value
+  // of 0.8 will lower the maximum volume to about 50%.
+
+  bt->setProximityMultiplier(1.8);
+
 
   // Set the volume to zero initially so that nothing sounds until
   // your hand gets near the proximity pin (pin zero that we set above).
@@ -70,7 +83,7 @@ void loop() {
     // If it's the same pin, we don't have to do anything.
     if (playerStatus == IS_PLAYING) {
       if (highestProximityPin != lastTrack) {
-	bt->startTrack(highestProximityPin);
+        bt->startTrack(highestProximityPin);
       }
     }
 
@@ -78,12 +91,12 @@ void loop() {
 
       // If it's paused and this is the same track, resume playing
       if (highestProximityPin == lastTrack) {
-	bt->resumeTrack();
+        bt->resumeTrack();
       }
 
       // If it's paused and this is a different track, switch to the new track
       else {
-	bt->startTrack(highestProximityPin);
+        bt->startTrack(highestProximityPin);
       }
 
     }

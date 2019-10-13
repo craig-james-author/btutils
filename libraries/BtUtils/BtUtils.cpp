@@ -50,7 +50,7 @@ BtUtils::BtUtils(SdFat *sd_in, SFEMP3Shield *MP3player_in) {
   _thisFadeInTime      = 0;
   _thisFadeOutTime     = 0;
   _lastProximity       = 0.0;
-  _proximityPinNumber  = 0;
+  _proximityMultiplier = 1.3;
 
   _sd = sd_in;
   _MP3player = MP3player_in;
@@ -198,9 +198,12 @@ int BtUtils::getProximityPercent(int pinNumber) {
   // map the LOW_DIFF..HIGH_DIFF range to 0..100 (percentage)
   int thisProximity = map(_lastProximity, LOW_DIFF, HIGH_DIFF, 0, 100);
 
-  return thisProximity;
+  return (int)((float)thisProximity*_proximityMultiplier);
 }
 
+int BtUtils::setProximityMultiplier(float multiplier) {
+  _proximityMultiplier = multiplier;
+}
 
 /*----------------------------------------------------------------------
  * Volume controls

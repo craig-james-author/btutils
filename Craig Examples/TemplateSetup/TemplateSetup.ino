@@ -1,10 +1,10 @@
 #include "BtUtils.h"
-#include <MPR121.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <SdFat.h>
-#include <FreeStack.h> 
-#include <SFEMP3Shield.h>
+// #include <MPR121.h>
+// #include <Wire.h>
+// #include <SPI.h>
+// #include <SdFat.h>
+// #include <FreeStack.h> 
+// #include <SFEMP3Shield.h>
 
 SdFat sd;
 SFEMP3Shield MP3player;

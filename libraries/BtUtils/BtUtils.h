@@ -4,18 +4,18 @@
 #define BtUtils_h 1
 
 #include "BtUtils.h"
-#include "math.h"
+// #include "math.h"
 
 // touch includes
 #include <MPR121.h>
-#include <Wire.h>
+// #include <Wire.h>
 #define MPR121_ADDR 0x5C
 #define MPR121_INT 4
 
 // mp3 includes
-#include <SPI.h>
-#include <SdFat.h>
-#include <FreeStack.h> 
+// #include <SPI.h>
+// #include <SdFat.h>
+// #include <FreeStack.h> 
 #include <SFEMP3Shield.h>
 
 // TouchBoard definitions
@@ -77,6 +77,7 @@ class BtUtils
 
   void setProximitySensingMode();
   int getProximityPercent(int pinNumber);
+  int setProximityMultiplier(float multiplier);
 
  private:
   int _playerStatus;
@@ -93,6 +94,7 @@ class BtUtils
   int _thisFadeInTime;
   int _thisFadeOutTime;
   float _lastProximity;
+  float _proximityMultiplier;
   int _proximityPinNumber;
   SdFat *_sd;
   SFEMP3Shield *_MP3player;

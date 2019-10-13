@@ -388,6 +388,7 @@ uint8_t SFEMP3Shield::VSLoadUserCode(char* fileName){
  */
 uint8_t SFEMP3Shield::enableTestSineWave(uint8_t freq) {
 
+#ifndef SFEMP3_REDUCE_LIBRARY_SIZE
   if(isPlaying() || !digitalRead(MP3_RESET)) {
     Serial.println(F("Warning Tests are not available."));
     return -1;
@@ -419,6 +420,7 @@ uint8_t SFEMP3Shield::enableTestSineWave(uint8_t freq) {
   }
 
   playing_state = testing_sinewave;
+#endif
   return 1;
 }
 
@@ -439,6 +441,7 @@ uint8_t SFEMP3Shield::enableTestSineWave(uint8_t freq) {
  */
 uint8_t SFEMP3Shield::disableTestSineWave() {
 
+#ifndef SFEMP3_REDUCE_LIBRARY_SIZE
   if(isPlaying() || !digitalRead(MP3_RESET)) {
     Serial.println(F("Warning Tests are not available."));
     return -1;
@@ -473,6 +476,7 @@ uint8_t SFEMP3Shield::disableTestSineWave() {
   Mp3WriteRegister(SCI_MODE, Mp3ReadRegister(SCI_MODE) & ~SM_TESTS);
 
   playing_state = ready;
+#endif
   return 0;
 }
 
@@ -494,6 +498,7 @@ uint8_t SFEMP3Shield::disableTestSineWave() {
  */
 uint16_t SFEMP3Shield::memoryTest() {
 
+#ifndef SFEMP3_REDUCE_LIBRARY_SIZE
   if(isPlaying() || !digitalRead(MP3_RESET)) {
     Serial.println(F("Warning Tests are not available."));
     return -1;
@@ -542,6 +547,10 @@ uint16_t SFEMP3Shield::memoryTest() {
 
   playing_state = ready;
   return MP3SCI_HDAT0;
+#endif
+#ifdef SFEMP3_REDUCE_LIBRARY_SIZE
+  return 0;
+#endif
 }
 // @}
 // SelfTest_Group
@@ -863,6 +872,7 @@ void SFEMP3Shield::setPlaySpeed(uint16_t data) {
  */
 uint8_t SFEMP3Shield::getEarSpeaker() {
   uint8_t result = 0;
+#ifndef SFEMP3_REDUCE_LIBRARY_SIZE
   uint16_t MP3SCI_MODE = Mp3ReadRegister(SCI_MODE);
 
   // SM_EARSPEAKER bits are not adjacent hence need to add them together
@@ -872,6 +882,7 @@ uint8_t SFEMP3Shield::getEarSpeaker() {
   if(MP3SCI_MODE & SM_EARSPEAKER_HI) {
     result += 0b10;
   }
+#endif
   return result;
 }
 
@@ -886,6 +897,7 @@ uint8_t SFEMP3Shield::getEarSpeaker() {
  * As specified by Data Sheet Section 8.7.1 and 8.4
  */
 void SFEMP3Shield::setEarSpeaker(uint16_t EarSpeaker) {
+#ifndef SFEMP3_REDUCE_LIBRARY_SIZE
   uint16_t MP3SCI_MODE = Mp3ReadRegister(SCI_MODE);
 
   // SM_EARSPEAKER bits are not adjacent hence need to add them individually
@@ -901,6 +913,7 @@ void SFEMP3Shield::setEarSpeaker(uint16_t EarSpeaker) {
     MP3SCI_MODE &= ~SM_EARSPEAKER_HI;
   }
   Mp3WriteRegister(SCI_MODE, MP3SCI_MODE);
+#endif
 }
 // @}
 // EarSpeaker_Group
@@ -1399,6 +1412,8 @@ uint32_t SFEMP3Shield::currentPosition(){
 // @{
 // Audio_Information_Group
 
+#ifndef SFEMP3_REDUCE_LIBRARY_SIZE
+
 //------------------------------------------------------------------------------
 /**
  * \brief Get Track's Artist
@@ -1461,7 +1476,6 @@ void SFEMP3Shield::trackAlbum(char* infobuffer){
  * Restoring the file position to where it left off, before resuming.
  */
 void SFEMP3Shield::getTrackInfo(uint8_t offset, char* infobuffer){
-
   //disable interupts
   if(playing_state == playback) {
     disableRefill();
@@ -1484,8 +1498,8 @@ void SFEMP3Shield::getTrackInfo(uint8_t offset, char* infobuffer){
   if(playing_state == playback) {
     enableRefill();
   }
-
 }
+#endif
 
 //------------------------------------------------------------------------------
 /**
@@ -1500,6 +1514,7 @@ void SFEMP3Shield::getTrackInfo(uint8_t offset, char* infobuffer){
  * Restoring the file position to where it left off, before resuming.
  */
 void SFEMP3Shield::getAudioInfo() {
+#ifndef SFEMP3_REDUCE_LIBRARY_SIZE
 
   //disable interupts
   // already disabled in Mp3ReadRegister function
@@ -1567,6 +1582,7 @@ void SFEMP3Shield::getAudioInfo() {
   Serial.print(currentPosition(), DEC);
 
   Serial.println();
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1638,6 +1654,7 @@ void SFEMP3Shield::getBitRateFromMP3File(char* fileName) {
         }
       }
     }
+
   }
 
 //------------------------------------------------------------------------------
