@@ -80,7 +80,7 @@ void loop() {
 
       // If it's paused and this is the same track, resume playing
       if (highestProximityPin == lastTrack) {
-         bt->resumeTrack();
+        bt->resumeTrack();
       }
 
       // If it's paused and this is a different track, switch to the new track
