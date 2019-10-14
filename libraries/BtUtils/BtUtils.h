@@ -21,6 +21,7 @@
 // TouchBoard definitions
 #define FIRST_PIN  0
 #define LAST_PIN  11
+#define NUM_PINS  12
 
 // Music playback state
 #define IS_STOPPED 0
@@ -80,6 +81,8 @@ class BtUtils
   int setProximityMultiplier(float multiplier);
 
  private:
+
+  // MP3 player status
   int _playerStatus;
   int _lastTrackPlayed;
   unsigned long _lastStartTime;
@@ -87,15 +90,24 @@ class BtUtils
   unsigned long _startDelay;
   unsigned long _lastActionTime;
   unsigned long _startOverIfIdleTime;
+
+  // Volume control
   int _targetVolume;
   int _actualVolume;
   int _fadeInTime;
   int _fadeOutTime;
   int _thisFadeInTime;
   int _thisFadeOutTime;
+
+  // Touch pins status
+  bool _pinIsTouched[NUM_PINS];
+  bool _lastPinTouched;
+
+
+  // Proximity detection and smoothing
   float _lastProximity;
   float _proximityMultiplier;
-  int _proximityPinNumber;
+
   SdFat *_sd;
   SFEMP3Shield *_MP3player;
 

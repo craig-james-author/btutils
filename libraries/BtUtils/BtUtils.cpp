@@ -41,14 +41,20 @@ BtUtils::BtUtils(SdFat *sd_in, SFEMP3Shield *MP3player_in) {
   _lastStartTime       = 0;
   _lastStopTime        = 0;
   _startDelay          = 1000;
-  _startOverIfIdleTime = -1;
   _lastActionTime      = 0;
+  _startOverIfIdleTime = -1;
+
   _targetVolume        = 100;
   _actualVolume        = 100;
   _fadeInTime          = 0;
   _fadeOutTime         = 0;
   _thisFadeInTime      = 0;
   _thisFadeOutTime     = 0;
+
+  for (unsigned char i = FIRST_PIN; i <= LAST_PIN; i++)
+    _pinIsTouched[i] = false;
+  _lastPinTouched = -1;
+
   _lastProximity       = 0.0;
   _proximityMultiplier = 1.3;
 
@@ -133,32 +139,53 @@ void BtUtils::setTouchReleaseThreshold(int touchThreshold, int releaseThreshold)
 int BtUtils::getPinTouchStatus(int *whichTrack) {
 
   *whichTrack = -1;
-  int pinStatus = TOUCH_NO_CHANGE;
+  bool pinIsTouched[NUM_PINS}
 
   if (!MPR121.touchStatusChanged())
-    return pinStatus;
+    return TOUCH_NO_CHANGE;
 
   MPR121.updateTouchData();
-  if (MPR121.getNumTouches() > 1)     // Ignore when two or more pins touched
-    return pinStatus;
 
-  // Loop over pins, find the one that was touched. Note that we don't end
+  // Loop over pins, find the status of each. Note that we don't end
   // the loop even if we find one; we test all of the pins. This seems to
   // be necessary so that isNewTouch() returns correctly the next time we try.
-  for (int i = FIRST_PIN; i <= LAST_PIN; i++) {
-    if (MPR121.isNewTouch(i)) {
-      *whichTrack = i - FIRST_PIN;
-      pinStatus = NEW_TOUCH;
-      LOG_ACTION("pin touched: ", i);
-      turnLedOn();
-    }
-    else if (MPR121.isNewRelease(i)){
-      *whichTrack = i - FIRST_PIN;
-      pinStatus = NEW_RELEASE;
-      LOG_ACTION("pin released: ", i);
-      turnLedOff();
-    }
+  numPinsTouched = 0;
+  for (unsigned char i = FIRST_PIN; i <= LAST_PIN; i++) {
+    pinIsTouched[i] = MPR121.getTouchData(i);
+    if (pinIsTouched[i])
+      numPinsTouched++;
   }
+
+  // If last status says no pin was touched
+  //   if no pins are touched now
+  //     - status is TOUCH_NO_CHANGE
+  //   else
+  //     - status is NEW_TOUCH
+  //     - *whichPin is lowest-numbered pin 
+  // else (last status says a pin was being touched)
+  //   if the last pin touched is still touched
+  //     - status is TOUCH_NO_CHANGE
+  //   else (the last pin touched isn't any more)
+  //     - If no other pins are touched
+  //          - status NEW_RELEASE on that pin
+  //          - lastPinTouched is -1
+  //     - else (another pin is being touched)
+  //        - status is NEW_TOUCH on that pin
+  //        - lastPinTouched is that pin
+  //
+  // record new pin state
+  // return status and *whichTrack
+
+  int touchStatus;
+  if (_lastPinTouched >= 0 && pinIsTouched[_lastPinTouched]) {
+    return TOUCH_NO_CHANGE;
+  }
+
+
+  if (_lastPinTouched >= 0 && !pinIsTouched[_lastPinTouched]) {
+
+
+  
   return pinStatus;
 }
 
@@ -390,6 +417,7 @@ void BtUtils::startTrack(int trackNumber, uint32_t location) {
   }
   _MP3player->playTrack(trackNumber);
   if (location) {
+    
     // Note to self: This skipTo() feature just doesn't work. It has to have been playing
     // for at least 1 second or thereabouts before the MP3 player knows where it is; prior
     // to that it just ignores the skipTo() function. Not only that, but once you do skipTo(),
@@ -398,6 +426,10 @@ void BtUtils::startTrack(int trackNumber, uint32_t location) {
     // makes the feature useless.
     delay(1000);
     _MP3player->skipTo(location);
+    delay(100);
+    if (_MP3player->isPlaying() != 1) {	// did it happen to reach the end?
+      stopTrack();
+    }
   }
   _lastTrackPlayed = trackNumber;
   _lastStartTime = millis();
