@@ -1,3 +1,5 @@
+//When released the track continues until another track is touched. If returned to previous, it resume where it left off in place.
+
 #include "BtUtils.h"
 #include <MPR121.h>
 #include <Wire.h>
