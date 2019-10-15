@@ -68,6 +68,7 @@ void loop() {
       Serial.print(" at ");
       Serial.println(trackPosition[trackNumber]);
     }
+    bt->turnLedOn();
   }
 
   // Pause the track as soon as the release is detected. Notice that
@@ -80,6 +81,7 @@ void loop() {
     bt->pauseTrack();
     Serial.print("Pause track at: ");
     Serial.println(trackPosition[lastPlayed]);
+    bt->turnLedOff();
   } 
 
   bt->doTimerTasks();

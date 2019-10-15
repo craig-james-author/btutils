@@ -65,12 +65,14 @@ void loop() {
     } else {
       bt->startTrack(trackNumber);
     }
+    bt->turnLedOn();
   }
 
   // Pause the track as soon as the release is detected.
 
   else if (touchStatus == NEW_RELEASE) {
     bt->pauseTrack();
+    bt->turnLedOff();
   } 
 
 }

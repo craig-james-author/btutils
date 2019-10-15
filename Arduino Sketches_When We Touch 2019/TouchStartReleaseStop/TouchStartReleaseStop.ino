@@ -56,8 +56,10 @@ void loop() {
 
   if (touchStatus == NEW_TOUCH) {
     bt->startTrack(trackNumber);
+    bt->turnLedOn();
   }
   else if (touchStatus == NEW_RELEASE) {
     bt->stopTrack();
+    bt->turnLedOff();
   } 
 }

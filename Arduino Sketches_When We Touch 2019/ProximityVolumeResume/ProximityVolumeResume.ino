@@ -69,6 +69,7 @@ void loop() {
       bt->pauseTrack();
     }
     bt->setVolume(0);
+    bt->turnLedOff();
   }
 
   // else -- proximity was detected
@@ -106,6 +107,7 @@ void loop() {
       bt->startTrack(highestProximityPin);
     }
 
+    bt->turnLedOn();
   }
 
 }

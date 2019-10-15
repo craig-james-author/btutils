@@ -53,8 +53,10 @@ void loop() {
   if (touchStatus == NEW_TOUCH) {
     if (bt->getPlayerStatus() == IS_PLAYING) {
       bt->stopTrack();
+      bt->turnLedOff();
     } else {
       bt->startTrack(trackNumber);
+      bt->turnLedOn();
     }
   }
 }
