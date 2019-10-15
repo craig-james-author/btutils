@@ -36,7 +36,7 @@
 
 
 // Debugging: enable/disable logging
-#define DEBUG 1
+// #define DEBUG 1
 #ifdef DEBUG
 #define LOG_ACTION log_action
 #define SERIAL_BEGIN(x) Serial.begin(x)
@@ -49,9 +49,10 @@
 #define SERIAL_PRINTLN(x)
 #endif
 
-
+// Disable certain unneeded features to save space
 
 #define BTUTILS_ENABLE_FADES 1
+#define BTUTILS_ENABLE_START_AFTER_DELAY 0
 
 class BtUtils
 {

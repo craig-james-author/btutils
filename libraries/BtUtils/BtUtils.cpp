@@ -431,6 +431,7 @@ uint32_t BtUtils::getCurrentTrackLocation() {
 }
 
 
+#if BTUTILS_ENABLE_START_AFTER_DELAY
 void BtUtils::queueTrackToStartAfterDelay(int trackNumber) {
   LOG_ACTION("queue track, waiting for timeout, track ", trackNumber);
   if (_MP3player->isPlaying()) {
@@ -442,6 +443,7 @@ void BtUtils::queueTrackToStartAfterDelay(int trackNumber) {
   _lastActionTime = _lastStartTime;
   _playerStatus = IS_WAITING;
 }
+#endif
 
 void BtUtils::startTrack(int trackNumber, uint32_t location) {
   LOG_ACTION("start track ", trackNumber);
@@ -540,6 +542,7 @@ void BtUtils::setStartDelay(int milliseconds) {
 }
 
 void BtUtils::_startTrackIfStartDelayReached() {
+#if BTUTILS_ENABLE_START_AFTER_DELAY
   if (_playerStatus != IS_WAITING || _startDelay <= 0) {
     return;
   }
@@ -549,6 +552,7 @@ void BtUtils::_startTrackIfStartDelayReached() {
   }
   LOG_ACTION("wait time (milliseconds) completed: ", _startDelay);
   startTrack(_lastTrackPlayed);
+#endif
 }
 
 void BtUtils::doTimerTasks() {
