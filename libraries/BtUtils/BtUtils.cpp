@@ -68,17 +68,17 @@ BtUtils* BtUtils::setup(SdFat *sd, SFEMP3Shield *MP3player) {
   // creating the BtUtils object dynamically during the Arduino setup()
   // function, we avoid those problems.
 
-  Serial.begin(57600);
+  SERIAL_BEGIN(57600);
   pinMode(LED_BUILTIN, OUTPUT);
 
   // while (!Serial) ; {} //uncomment when using the serial monitor 
-  Serial.println("BtUtils setup");
+  SERIAL_PRINTLN("BtUtils setup");
 
   if (!sd->begin(SD_SEL, SPI_HALF_SPEED))
     sd->initErrorHalt();
 
   if (!MPR121.begin(MPR121_ADDR))
-    Serial.println("error setting up MPR121");
+    SERIAL_PRINTLN("error setting up MPR121");
   MPR121.setInterruptPin(MPR121_INT);
   MPR121.setTouchThreshold(40);
   MPR121.setReleaseThreshold(20);
@@ -87,9 +87,9 @@ BtUtils* BtUtils::setup(SdFat *sd, SFEMP3Shield *MP3player) {
   MP3player->setVolume(10,10);
  
   if(result != 0) {
-    Serial.print("Error code: ");
-    Serial.print(result);
-    Serial.println(" when trying to start MP3 player");
+    SERIAL_PRINT("Error code: ");
+    SERIAL_PRINT(result);
+    SERIAL_PRINTLN(" when trying to start MP3 player");
    }
 
   BtUtils* bt = new BtUtils(sd, MP3player);
@@ -144,24 +144,23 @@ int BtUtils::getPinTouchStatus(int *whichPinChanged) {
 
   MPR121.updateTouchData();
 
-  // Loop over pins, find the status of each. Note that we don't end
-  // the loop even if we find one; we test all of the pins. This seems to
-  // be necessary so that isNewTouch() returns correctly the next time we try.
-  Serial.print("_lastPinTouched: ");
-  Serial.print(_lastPinTouched);
-  Serial.print(", Current pins: ");
+  // Loop over pins, find the status of each. Note that it seems to be
+  // necessary to check every pin every time anyway so that isNewTouch()
+  // returns correctly the next time we try.
+  SERIAL_PRINT("_lastPinTouched: ");
+  SERIAL_PRINT(_lastPinTouched);
+  SERIAL_PRINT(", Current pins: ");
   unsigned char numPinsTouched = 0;
   for (unsigned char i = FIRST_PIN; i <= LAST_PIN; i++) {
     pinIsTouched[i] = MPR121.getTouchData(i);
     if (pinIsTouched[i])
       numPinsTouched++;
-    Serial.print(i);
-    Serial.print(":");
-    Serial.print((pinIsTouched[i] ? "on  " : "off "));
+    SERIAL_PRINT(i);
+    SERIAL_PRINT(":");
+    SERIAL_PRINT((pinIsTouched[i] ? "on  " : "off "));
   }
-  Serial.println("");
+  SERIAL_PRINTLN("");
   
-
   // If last status says no pin was touched
   //   if no pins are touched now
   //     - status is TOUCH_NO_CHANGE
@@ -183,7 +182,7 @@ int BtUtils::getPinTouchStatus(int *whichPinChanged) {
   // return status and *whichPinChanged
 
   int touchStatus;
-  if (_lastPinTouched < 0) {		// Last time through, no pin was touched, so this is new
+  if (_lastPinTouched < 0) {	// Last time through, no pin was touched, so this is new
     if (numPinsTouched == 0) {
       touchStatus = TOUCH_NO_CHANGE;
     }
@@ -196,7 +195,7 @@ int BtUtils::getPinTouchStatus(int *whichPinChanged) {
 	}
       }
     }
-  } else {					// Last time through, a pin was touched, so check for changes
+  } else {  // Last time through, a pin was touched, so check for changes
     if (pinIsTouched[_lastPinTouched]) {	// Same pin stil being touched?
       touchStatus = TOUCH_NO_CHANGE;
     } else {					// Last pin touched has been released
@@ -221,10 +220,10 @@ int BtUtils::getPinTouchStatus(int *whichPinChanged) {
     _lastPinTouched = -1;
   }
   
-  Serial.print("Return: whichPinChanged: ");
-  Serial.print(*whichPinChanged);
-  Serial.print(", touchStatus: ");
-  Serial.println((touchStatus == TOUCH_NO_CHANGE ? "TOUCH_NO_CHANGE" : (touchStatus == NEW_TOUCH ? "NEW_TOUCH" : "NEW_RELEASE")));
+  SERIAL_PRINT("Return: whichPinChanged: ");
+  SERIAL_PRINT(*whichPinChanged);
+  SERIAL_PRINT(", touchStatus: ");
+  SERIAL_PRINTLN((touchStatus == TOUCH_NO_CHANGE ? "TOUCH_NO_CHANGE" : (touchStatus == NEW_TOUCH ? "NEW_TOUCH" : "NEW_RELEASE")));
 
   return touchStatus;
 }
