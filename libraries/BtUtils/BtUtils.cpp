@@ -51,8 +51,6 @@ BtUtils::BtUtils(SdFat *sd_in, SFEMP3Shield *MP3player_in) {
   _thisFadeInTime      = 0;
   _thisFadeOutTime     = 0;
 
-  for (unsigned char i = FIRST_PIN; i <= LAST_PIN; i++)
-    _pinIsTouched[i] = false;
   _lastPinTouched = -1;
 
   _lastProximity       = 0.0;
@@ -136,10 +134,10 @@ void BtUtils::setTouchReleaseThreshold(int touchThreshold, int releaseThreshold)
   LOG_ACTION("Release threshold: ", releaseThreshold);
 }  
 
-int BtUtils::getPinTouchStatus(int *whichTrack) {
+int BtUtils::getPinTouchStatus(int *whichPinChanged) {
 
-  *whichTrack = -1;
-  bool pinIsTouched[NUM_PINS}
+  *whichPinChanged = -1;
+  bool pinIsTouched[NUM_PINS];
 
   if (!MPR121.touchStatusChanged())
     return TOUCH_NO_CHANGE;
@@ -149,12 +147,20 @@ int BtUtils::getPinTouchStatus(int *whichTrack) {
   // Loop over pins, find the status of each. Note that we don't end
   // the loop even if we find one; we test all of the pins. This seems to
   // be necessary so that isNewTouch() returns correctly the next time we try.
-  numPinsTouched = 0;
+  Serial.print("_lastPinTouched: ");
+  Serial.print(_lastPinTouched);
+  Serial.print(", Current pins: ");
+  unsigned char numPinsTouched = 0;
   for (unsigned char i = FIRST_PIN; i <= LAST_PIN; i++) {
     pinIsTouched[i] = MPR121.getTouchData(i);
     if (pinIsTouched[i])
       numPinsTouched++;
+    Serial.print(i);
+    Serial.print(":");
+    Serial.print((pinIsTouched[i] ? "on  " : "off "));
   }
+  Serial.println("");
+  
 
   // If last status says no pin was touched
   //   if no pins are touched now
@@ -174,19 +180,53 @@ int BtUtils::getPinTouchStatus(int *whichTrack) {
   //        - lastPinTouched is that pin
   //
   // record new pin state
-  // return status and *whichTrack
+  // return status and *whichPinChanged
 
   int touchStatus;
-  if (_lastPinTouched >= 0 && pinIsTouched[_lastPinTouched]) {
-    return TOUCH_NO_CHANGE;
+  if (_lastPinTouched < 0) {		// Last time through, no pin was touched, so this is new
+    if (numPinsTouched == 0) {
+      touchStatus = TOUCH_NO_CHANGE;
+    }
+    else {
+      touchStatus = NEW_TOUCH;
+      for (unsigned char i = FIRST_PIN; i <= LAST_PIN; i++) {
+	if (pinIsTouched[i]) {
+	  *whichPinChanged = i;
+	  break;
+	}
+      }
+    }
+  } else {					// Last time through, a pin was touched, so check for changes
+    if (pinIsTouched[_lastPinTouched]) {	// Same pin stil being touched?
+      touchStatus = TOUCH_NO_CHANGE;
+    } else {					// Last pin touched has been released
+      if (numPinsTouched == 0) {
+	touchStatus = NEW_RELEASE;
+	*whichPinChanged = _lastPinTouched;
+      } else {
+	touchStatus = NEW_TOUCH;
+	for (unsigned char i = FIRST_PIN; i <= LAST_PIN; i++) {
+	  if (pinIsTouched[i]) {
+	    *whichPinChanged = i;
+	    break;
+	  }
+	}
+      }
+    }
   }
 
-
-  if (_lastPinTouched >= 0 && !pinIsTouched[_lastPinTouched]) {
-
-
+  if (touchStatus == NEW_TOUCH) {
+    _lastPinTouched = *whichPinChanged;
+  } else if (touchStatus == NEW_RELEASE) {
+    _lastPinTouched = -1;
+  }
   
-  return pinStatus;
+  Serial.print("Return: whichPinChanged: ");
+  Serial.print(*whichPinChanged);
+  Serial.print(", touchStatus: ");
+  Serial.println((touchStatus == TOUCH_NO_CHANGE ? "TOUCH_NO_CHANGE" : (touchStatus == NEW_TOUCH ? "NEW_TOUCH" : "NEW_RELEASE")));
+
+  return touchStatus;
 }
 
 /*----------------------------------------------------------------------

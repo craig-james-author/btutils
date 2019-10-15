@@ -35,6 +35,7 @@
 #define NEW_RELEASE 2
 
 // Debugging: enable/disable logging
+#define DEBUG 1
 #ifdef DEBUG
 #define LOG_ACTION log_action
 #else
@@ -54,7 +55,7 @@ class BtUtils
   static void turnLedOff();
   void doTimerTasks();
 
-  int  getPinTouchStatus(int *whichTrack);
+  int  getPinTouchStatus(int *whichPinChanged);
   void setTouchReleaseThreshold(int touchThreshold, int releaseThreshold);
 
   void setVolume(int percent);
@@ -99,10 +100,8 @@ class BtUtils
   int _thisFadeInTime;
   int _thisFadeOutTime;
 
-  // Touch pins status
-  bool _pinIsTouched[NUM_PINS];
-  bool _lastPinTouched;
-
+  // Touch pins: what was the last one touched?
+  int _lastPinTouched;
 
   // Proximity detection and smoothing
   float _lastProximity;
