@@ -39,12 +39,10 @@
 // #define DEBUG 1
 #ifdef DEBUG
 #define LOG_ACTION log_action
-#define SERIAL_BEGIN(x) Serial.begin(x)
 #define SERIAL_PRINT(x) Serial.print(x)
 #define SERIAL_PRINTLN(x) Serial.println(x)
 #else
 #define LOG_ACTION(A,B)
-#define SERIAL_BEGIN(x)
 #define SERIAL_PRINT(x)
 #define SERIAL_PRINTLN(x)
 #endif
@@ -121,6 +119,7 @@ class BtUtils
   SFEMP3Shield *_MP3player;
 
   uint8_t _volumePctToByte(int percent);
+  void _setVolume(int leftPercent, int rightPercent);
   void _setActualVolume(int percent);
   int  _calculateFadeTime(bool goingUp);
   void _doVolumeFadeInAndOut();

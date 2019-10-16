@@ -68,11 +68,14 @@ BtUtils* BtUtils::setup(SdFat *sd, SFEMP3Shield *MP3player) {
   // creating the BtUtils object dynamically during the Arduino setup()
   // function, we avoid those problems.
 
-  SERIAL_BEGIN(57600);
   pinMode(LED_BUILTIN, OUTPUT);
 
-  // while (!Serial) ; {} //uncomment when using the serial monitor 
-  SERIAL_PRINTLN("BtUtils setup");
+  unsigned long start_millis = millis();
+  Serial.begin(57600);
+  while (!Serial && ((millis() - start_millis) < 2000)) ; {}
+  delay(250);		// bug: without this delay and println('-----'), won't print the "Setup" message
+  Serial.println("-------");
+  Serial.println("Setup");
 
   if (!sd->begin(SD_SEL, SPI_HALF_SPEED))
     sd->initErrorHalt();
@@ -147,19 +150,21 @@ int BtUtils::getPinTouchStatus(int *whichPinChanged) {
   // Loop over pins, find the status of each. Note that it seems to be
   // necessary to check every pin every time anyway so that isNewTouch()
   // returns correctly the next time we try.
-  SERIAL_PRINT("_lastPinTouched: ");
-  SERIAL_PRINT(_lastPinTouched);
-  SERIAL_PRINT(", Current pins: ");
+  // Serial.print("_lastPinTouched: ");
+  // Serial.print(_lastPinTouched);
+  // Serial.print(", ");
+  Serial.print("pins: ");
   unsigned char numPinsTouched = 0;
   for (unsigned char i = FIRST_PIN; i <= LAST_PIN; i++) {
     pinIsTouched[i] = MPR121.getTouchData(i);
-    if (pinIsTouched[i])
+    if (pinIsTouched[i]) {
+      Serial.print(i);
       numPinsTouched++;
-    SERIAL_PRINT(i);
-    SERIAL_PRINT(":");
-    SERIAL_PRINT((pinIsTouched[i] ? "on  " : "off "));
+    } else {
+      Serial.print((i > 9) ? "  " : " ");
+    }
+    Serial.print(" ");
   }
-  SERIAL_PRINTLN("");
   
   // If last status says no pin was touched
   //   if no pins are touched now
@@ -220,10 +225,11 @@ int BtUtils::getPinTouchStatus(int *whichPinChanged) {
     _lastPinTouched = -1;
   }
   
-  SERIAL_PRINT("Return: whichPinChanged: ");
-  SERIAL_PRINT(*whichPinChanged);
-  SERIAL_PRINT(", touchStatus: ");
-  SERIAL_PRINTLN((touchStatus == TOUCH_NO_CHANGE ? "TOUCH_NO_CHANGE" : (touchStatus == NEW_TOUCH ? "NEW_TOUCH" : "NEW_RELEASE")));
+  Serial.print((touchStatus == TOUCH_NO_CHANGE ? "No Change " : (touchStatus == NEW_TOUCH ? "Touch " : "Release ")));
+  if (*whichPinChanged >= 0) {
+    Serial.print(*whichPinChanged);
+  }
+  Serial.println("");
 
   return touchStatus;
 }
@@ -300,10 +306,14 @@ void BtUtils::_setActualVolume(int percent) {
   _actualVolume = percent;
 }
 
-void BtUtils::setVolume(int leftPercent, int rightPercent) {
-  LOG_ACTION("set volume set: ", leftPercent);
+void BtUtils::_setVolume(int leftPercent, int rightPercent) {
   _targetVolume = leftPercent;
   _setActualVolume(leftPercent);
+}
+
+void BtUtils::setVolume(int leftPercent, int rightPercent) {
+  log_action("set volume percent: ", leftPercent);
+  _setVolume(leftPercent, rightPercent);
 }
 
 void BtUtils::setVolume(int percent) {
@@ -366,6 +376,7 @@ void BtUtils::_doVolumeFadeInAndOut() {
       if (newVolumePercent >= _targetVolume) {
 	newVolumePercent = _targetVolume;
       }
+      log_action("Set volume: ", newVolumePercent);
       _setActualVolume(newVolumePercent);
     }
   }
@@ -389,13 +400,15 @@ void BtUtils::_doVolumeFadeInAndOut() {
     // Time to decrease volume?
 
     if (newVolumePercent != _actualVolume) {
-      if (newVolumePercent < 0) {
+      log_action("Set volume: ", newVolumePercent);
+      if (newVolumePercent <= 0) {
 	newVolumePercent = 0;
 	if (_playerStatus == IS_PAUSED) {
 	  _MP3player->pauseMusic();
-	  LOG_ACTION("fade-out done, music paused, track ", _lastTrackPlayed);
+	  log_action("fade-out done, track paused: ", _lastTrackPlayed);
 	} else {
 	  _MP3player->stopTrack();
+	  log_action("fade-out done, track stopped: ", _lastTrackPlayed);
 	}
       }
       _setActualVolume(newVolumePercent);
@@ -451,7 +464,7 @@ void BtUtils::startTrack(int trackNumber, uint32_t location) {
     _setActualVolume(0);       // fade-in: start with zero
     _thisFadeInTime = _fadeInTime;
   } else {
-    setVolume(_targetVolume);   // normal: start with full requested volume
+    _setVolume(_targetVolume, _targetVolume);   // normal: start with full requested volume
   }
   if (_MP3player->isPlaying()) {
     _MP3player->stopTrack();
