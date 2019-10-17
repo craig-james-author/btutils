@@ -27,12 +27,6 @@ void setup() {
   // bt->startOverAfterNoTouchTime(30);
 
 
-  // Set the delay time in milliseconds (e.g. 1000 is 1 second). When a track
-  // is started, the actual sound won't start until this time has elapsed.
-
-  // bt->setStartDelay(1500);
-
-
   // Set the output volume (left and right). This ranges from zero (silent) to
   // 100 (full volume).  The default is 100 (i.e. if you don't call this
   // function at all, the volume will be 100%).
@@ -68,6 +62,7 @@ void loop() {
   // If a new touch is detected:
   //   - if it's the same track as before, resume playing where it left off.
   //   - if it's a different track, start it from the beginning.
+  // (Note that this is the same as the TouchResumeReleaseStop sketch.)
 
   if (touchStatus == NEW_TOUCH) {
     int lastPlayed  = bt->getLastTrackPlayed();

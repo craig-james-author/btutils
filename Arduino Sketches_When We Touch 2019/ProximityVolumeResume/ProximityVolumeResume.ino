@@ -30,7 +30,7 @@ void setup() {
   // volume. A value of one means the maximum volume is around 70%. A value
   // of 0.8 will lower the maximum volume to about 50%.
 
-  bt->setProximityMultiplier(1.8);
+  bt->setProximityMultiplier(1.3);
 
 
   // Set the volume to zero initially so that nothing sounds until
@@ -38,14 +38,15 @@ void setup() {
 
   bt->setVolume(0);
 
+  bt->turnLedOff();
 }
+
+int lastProximity = 0;
 
 void loop() {
 
-
   int highestProximity = 0;
   int highestProximityPin = -1;
-
 
   // Find the pin with the highest proximity reading.
   for (int pin = FIRST_PIN; pin <= LAST_PIN; pin++) {
@@ -64,27 +65,33 @@ void loop() {
 
   // If nothing is near (proximity is zero) and a track is playing, pause it.
   if (highestProximity == 0) {
-    if (playerStatus == IS_PLAYING) {
-      BtUtils::log_action("pause: ", lastTrack);
-      bt->pauseTrack();
+    if (lastProximity != 0) {
+      if (playerStatus == IS_PLAYING) {
+	bt->pauseTrack();
+	bt->log_action("pause: ", lastTrack);
+      }
+      bt->setVolume(0);
+      lastProximity = 0;
+      bt->turnLedOff();
     }
-    bt->setVolume(0);
-    bt->turnLedOff();
   }
 
   // else -- proximity was detected
   else {
 
-    // Set the volume. The proximity is in percentage 0-100, and the volume is
+    // If the proximity value changed, set the volume. The proximity is in percentage 0-100, and the volume is
     // also 0-100, so we can just set the volume to the proximity number.
-    bt->setVolume(highestProximity);
-    BtUtils::log_action("setVolume: ", highestProximity);
+    if (highestProximity != lastProximity) {
+      bt->setVolume(highestProximity);
+      lastProximity = highestProximity;
+    }
 
     // If it's already playing but this is a different pin, switch tracks.
     // If it's the same pin, we don't have to do anything.
     if (playerStatus == IS_PLAYING) {
       if (highestProximityPin != lastTrack) {
         bt->startTrack(highestProximityPin);
+	bt->log_action("start: ", highestProximityPin);
       }
     }
 
@@ -93,11 +100,13 @@ void loop() {
       // If it's paused and this is the same track, resume playing
       if (highestProximityPin == lastTrack) {
         bt->resumeTrack();
+	bt->log_action("resume: ", lastTrack);
       }
 
       // If it's paused and this is a different track, switch to the new track
       else {
         bt->startTrack(highestProximityPin);
+	bt->log_action("start: ", highestProximityPin);
       }
 
     }
@@ -105,6 +114,7 @@ void loop() {
     // If it's currently stopped, start this track
     else if (playerStatus == IS_STOPPED) {
       bt->startTrack(highestProximityPin);
+      bt->log_action("start: ", highestProximityPin);
     }
 
     bt->turnLedOn();
