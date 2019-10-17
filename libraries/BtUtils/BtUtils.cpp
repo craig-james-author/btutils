@@ -72,10 +72,10 @@ BtUtils* BtUtils::setup(SdFat *sd, SFEMP3Shield *MP3player) {
 
   unsigned long start_millis = millis();
   Serial.begin(57600);
-  while (!Serial && ((millis() - start_millis) < 2000)) ; {}
-  delay(250);		// bug: without this delay and println('-----'), won't print the "Setup" message
-  Serial.println("-------");
-  Serial.println("Setup");
+//   while (!Serial && ((millis() - start_millis) < 2000)) ; {}
+//   delay(250);		// bug: without this delay and println('-----'), won't print the "Setup" message
+//   Serial.println("-------");
+//   Serial.println("Setup");
 
   if (!sd->begin(SD_SEL, SPI_HALF_SPEED))
     sd->initErrorHalt();
