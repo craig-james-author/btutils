@@ -19,7 +19,7 @@ void setup() {
   // 100 (full volume).  The default is 100 (i.e. if you don't call this
   // function at all, the volume will be 100%).
 
-  bt->setVolume(100, 100);
+  // bt->setVolume(100, 100);
 
 
   // Set the fade-in and fade-out times in milliseconds (e.g. 1000 is 1
