@@ -1,11 +1,10 @@
-#include "Compiler_Errors.h"
 #include "BtUtils.h"
-#include <MPR121.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <SdFat.h>
-#include <FreeStack.h> 
-#include <SFEMP3Shield.h>
+// #include <MPR121.h>
+// #include <Wire.h>
+// #include <SPI.h>
+// #include <SdFat.h>
+// #include <FreeStack.h> 
+// #include <SFEMP3Shield.h>
 
 SdFat sd;
 SFEMP3Shield MP3player;
@@ -13,13 +12,26 @@ SFEMP3Shield MP3player;
 BtUtils *bt;
 
 void setup() {
+
+  // This setup code must always be called. Leave it exactly like this in
+  // all of your "sketches".
+
   bt = BtUtils::setup(&sd, &MP3player);
+  
+
+  // This sets an "idle timeout" -- if nothing hapens for this length of time,
+  // it clears out the "resume" feature so that the next time you call
+  // bt->resume(), it will start the track over instead of resuming.  The
+  // timeout is in seconds.
+
+  // bt->startOverAfterNoTouchTime(30);
+
 
   // Set the output volume (left and right). This ranges from zero (silent) to
   // 100 (full volume).  The default is 100 (i.e. if you don't call this
   // function at all, the volume will be 100%).
 
-  bt->setVolume(50, 50);
+  // bt->setVolume(100, 100);
 
 
   // Set the fade-in and fade-out times in milliseconds (e.g. 1000 is 1
@@ -38,24 +50,33 @@ void setup() {
   // The first number is touch, the second number is release. Touch <i>must</i>
   // be greater than release.
 
-  // bt->setTouchReleaseThreshold(20, 10);
+  // bt->setTouchReleaseThreshold(40, 20);
 }
+
 
 void loop() {
 
   int trackNumber;
   int touchStatus = bt->getPinTouchStatus(&trackNumber);
 
-  // Plays while being touched, stops when released. Each track starts at the beginning.
+  // If a new touch is detected:
+  //   - if it's the same track as before, resume playing where it left off.
+  //   - if it's a different track, start it from the beginning.
 
   if (touchStatus == NEW_TOUCH) {
-    bt->startTrack(trackNumber);
-    bt->turnLedOn();
-    delay(100);
-    bt->turnLedOn();
-    delay(100);
-    bt->turnLedOn();
+    int lastPlayed  = bt->getLastTrackPlayed();
+    if (bt->getPlayerStatus() == IS_PAUSED && trackNumber == lastPlayed) {
+      bt->resumeTrack();
+    } else {
+      bt->startTrack(trackNumber);
+    }
   }
+
+  // Pause the track as soon as the release is detected.
+
+  else if (touchStatus == NEW_RELEASE) {
+    bt->pauseTrack();
+  } 
 
   bt->doTimerTasks();
 }
