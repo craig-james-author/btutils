@@ -20,7 +20,7 @@ void setup() {
   // 100 (full volume).  The default is 100 (i.e. if you don't call this
   // function at all, the volume will be 100%).
 
-  // bt->setVolume(100, 100);
+  bt->setVolume(100, 100);
 
 
   // Set the fade-in and fade-out times in milliseconds (e.g. 1000 is 1
@@ -29,8 +29,8 @@ void setup() {
   // the volume to (see above) is the target that the fade-in is heading
   // for in the specified time.
 
-  // bt->setFadeInTime(1000);    // 1 second fade-in
-  // bt->setFadeOutTime(2000);   // 2 second fade-out
+  bt->setFadeInTime(3000);    // 1 second fade-in
+  bt->setFadeOutTime(2000);   // 2 second fade-out
 
 
   // Set the touch sensitivity. Low values make it very sensitive (i.e. it

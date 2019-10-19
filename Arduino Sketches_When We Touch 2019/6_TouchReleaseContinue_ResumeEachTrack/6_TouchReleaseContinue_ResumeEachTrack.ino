@@ -1,4 +1,5 @@
-//Touch starts track. When released the track continues until another track is touched. If returned to previous track, it resumes where it left off in place. No time out.
+// Touch starts track. When released the track continues until another track is touched. If returned to previous track, it resumes where it left off in place. No time out.
+// Needs one second of something at the start of track -- can be silence or a sound such a waves, bell, or something that relates to the content of the track.
 
 #include "BtUtils.h"
 #include <MPR121.h>

@@ -28,7 +28,7 @@ void setup() {
   // the volume to (see above) is the target that the fade-in is heading
   // for in the specified time.
 
-  // bt->setFadeInTime(1000);    // 1 second fade-in
+  bt->setFadeInTime(2000);    // 1 second fade-in
   // bt->setFadeOutTime(2000);   // 2 second fade-out
 
 

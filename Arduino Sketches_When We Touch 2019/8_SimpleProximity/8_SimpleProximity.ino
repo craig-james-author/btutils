@@ -38,7 +38,7 @@ void setup() {
   // The first number is touch, the second number is release. Touch must
   // be greater than release.
 
-  bt->setTouchReleaseThreshold(10, 5);
+  bt->setTouchReleaseThreshold(4, 3);
 }
 
 void loop() {

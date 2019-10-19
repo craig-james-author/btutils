@@ -1,3 +1,6 @@
+// Touching the sensor starts the track. Releasing it stops it. Touching the same sensor, resumes where stopped. Touching a new, starts it. Touching previous resumes in place. 
+// Needs one second of something at the start of track -- can be silence or a sound such a waves, bell, or something that relates to the content of the track.
+
 #include "BtUtils.h"
 #include <MPR121.h>
 #include <Wire.h>
