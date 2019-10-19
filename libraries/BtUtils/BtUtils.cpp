@@ -58,6 +58,8 @@ BtUtils::BtUtils(SdFat *sd_in, SFEMP3Shield *MP3player_in) {
 
   _sd = sd_in;
   _MP3player = MP3player_in;
+
+  setVolume(100);
 }
 
 BtUtils* BtUtils::setup(SdFat *sd, SFEMP3Shield *MP3player) {
@@ -87,7 +89,6 @@ BtUtils* BtUtils::setup(SdFat *sd, SFEMP3Shield *MP3player) {
   MPR121.setReleaseThreshold(20);
 
   byte result = MP3player->begin();
-  MP3player->setVolume(10,10);
  
   if(result != 0) {
     SERIAL_PRINT("Error code: ");
