@@ -7,6 +7,7 @@ doTimerTasks	KEYWORD2
 setTouchReleaseThreshold	KEYWORD2
 setVolume	KEYWORD2
 setFadeInTime	KEYWORD2
+setFadeOutTime	KEYWORD2
 getPlayerStatus	KEYWORD2
 getLastTrackPlayed	KEYWORD2
 queueTrackToStartAfterDelay	KEYWORD2
@@ -15,3 +16,6 @@ resumeTrack	KEYWORD2
 pauseTrack	KEYWORD2
 setStartDelay	KEYWORD2
 startOverAfterNoTouchTime	KEYWORD2
+setProximitySensingMode	KEYWORD2
+getProximityPercent	KEYWORD2
+setProximityMultiplier	KEYWORD2
