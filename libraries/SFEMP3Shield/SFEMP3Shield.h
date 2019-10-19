@@ -6,10 +6,6 @@
 
 */
 
-// CJ -- comment out some code to save size
-#define SFEMP3_REDUCE_LIBRARY_SIZE 1
-
-
 #ifndef SFEMP3Shield_h
 #define SFEMP3Shield_h
 
