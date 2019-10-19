@@ -1,4 +1,4 @@
-//When released the track continues until another track is touched. If returned to previous, it resume where it left off in place.
+//Touch starts track. When released the track continues until another track is touched. If returned to previous track, it resumes where it left off in place. No time out.
 
 #include "BtUtils.h"
 #include <MPR121.h>
@@ -26,6 +26,14 @@ void setup() {
   // Same for the fade-out time.
 
   // bt->setFadeOutTime(2000);   // 2 second fade-out
+
+   // Set the touch sensitivity. Low values make it very sensitive (i.e. it
+  // will trigger a touch even when your hand is nearby), and high valuse
+  // make it less sensitive (i.e. you have to actually touch the contact).
+  // The first number is touch, the second number is release. Touch <i>must</i>
+  // be greater than release.
+
+   bt->setTouchReleaseThreshold(10, 8);
 
   for (int i = 0; i <= LAST_PIN; i++) {
     trackPosition[i] = 0;

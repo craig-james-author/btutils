@@ -57,16 +57,20 @@ void loop() {
   //   - if it's a different track, start it from the beginning.
 
   int lastPlayed  = bt->getLastTrackPlayed();
+  int currentLocation = bt->getCurrentTrackLocation();
   if (touchStatus == NEW_TOUCH) {
     if (bt->getPlayerStatus() == IS_PAUSED && trackNumber == lastPlayed) {
       bt->resumeTrack();
-      Serial.println("Resume track");
+      //Serial.println("Resume track");
     } else {
+      if (bt->getPlayerStatus() == IS_PLAYING) {
+        trackPosition[lastPlayed] += currentLocation;
+      }
       bt->startTrack(trackNumber, trackPosition[trackNumber]);
-      Serial.print("Start track ");
-      Serial.print(trackNumber);
-      Serial.print(" at ");
-      Serial.println(trackPosition[trackNumber]);
+     // Serial.print("Start track ");
+      //Serial.print(trackNumber);
+      //Serial.print(" at ");
+      //Serial.println(trackPosition[trackNumber]);
     }
     bt->turnLedOn();
   }
@@ -77,10 +81,10 @@ void loop() {
   // add it to the last track-position value.
 
   else if (touchStatus == NEW_RELEASE) {
-    trackPosition[lastPlayed] += bt->getCurrentTrackLocation();
+    trackPosition[lastPlayed] += currentLocation;
     bt->pauseTrack();
-    Serial.print("Pause track at: ");
-    Serial.println(trackPosition[lastPlayed]);
+    // Serial.print("Pause track at: ");
+    // Serial.println(trackPosition[lastPlayed]);
     bt->turnLedOff();
   } 
 

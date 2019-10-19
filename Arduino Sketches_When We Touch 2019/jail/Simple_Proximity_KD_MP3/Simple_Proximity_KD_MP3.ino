@@ -1,5 +1,7 @@
 
 /*******************************************************************************
+//Description: Get close to sensor; plays; move away or release it stops. Starts again at beginning. Best without shielded cables. The larger the sensor area, the more effective.
+
 
  Bare Conductive Proximity MP3 player
  ------------------------------
@@ -73,14 +75,14 @@ void setup(){
   // this is the touch threshold - setting it low makes it more like a proximity trigger
   // default value is 40 for touch; the lower the number the further away the start
   // the bigger the number, the close you need to be the start it
-  MPR121.setTouchThreshold(20);
+  MPR121.setTouchThreshold(1);
   
   // this is the release threshold - must ALWAYS be smaller than the touch threshold
   // default value is 20 for touch; the higher the number the further away the release/stop
   MPR121.setReleaseThreshold(.5);  
 
   result = MP3player.begin();
-  MP3player.setVolume(20,20);// the higher the number, the lower the sound
+  MP3player.setVolume(10,10);// the higher the number, the lower the sound
  
   if(result != 0) {
     Serial.print("Error code: ");

@@ -1,3 +1,5 @@
+//Good for testing sensor connection. Touch it starts, touch it stops.
+
 #include "BtUtils.h"
 #include <MPR121.h>
 #include <Wire.h>
@@ -13,17 +15,9 @@ BtUtils *bt;
 
 void setup() {
   bt = BtUtils::setup(&sd, &MP3player);
-  
-  // This sets an "idle timeout" -- if nothing hapens for this length of time,
-  // it clears out the "resume" feature so that the next time you call
-  // bt->resume(), it will start the track over instead of resuming.  The
-  // timeout is in seconds.
 
-  // bt->startOverAfterNoTouchTime(30);
-
-
-  // Set the output volume (left and right). This ranges from zero (silent)
-  // to 100 (full volume).  The default is 100 (i.e. if you don't call this
+  // Set the output volume (left and right). This ranges from zero (silent) to
+  // 100 (full volume).  The default is 100 (i.e. if you don't call this
   // function at all, the volume will be 100%).
 
   // bt->setVolume(100, 100);
@@ -45,34 +39,26 @@ void setup() {
   // The first number is touch, the second number is release. Touch <i>must</i>
   // be greater than release.
 
-  bt->setTouchReleaseThreshold(10, 5);
+  // bt->setTouchReleaseThreshold(40, 20);
 }
-
 
 void loop() {
 
   int trackNumber;
   int touchStatus = bt->getPinTouchStatus(&trackNumber);
 
-  // If a new touch is detected:
-  //   - if it's the same track as before, resume playing where it left off.
-  //   - if it's a different track, start it from the beginning.
+  // This is simple: touches alternately start and stop the track playing.
+  // Each track starts from the beginning each time. Note that if a track
+  // is playing, any touch on any pin will stop it; it doesn't have to be
+  // the same pin that started it.
 
   if (touchStatus == NEW_TOUCH) {
-    int lastPlayed  = bt->getLastTrackPlayed();
-    if (bt->getPlayerStatus() == IS_PAUSED && trackNumber == lastPlayed) {
-      bt->resumeTrack();
+    if (bt->getPlayerStatus() == IS_PLAYING) {
+      bt->stopTrack();
+      bt->turnLedOff();
     } else {
       bt->startTrack(trackNumber);
+      bt->turnLedOn();
     }
-    bt->turnLedOn();
   }
-
-  // Pause the track as soon as the release is detected.
-
-  else if (touchStatus == NEW_RELEASE) {
-    bt->pauseTrack();
-    bt->turnLedOff();
-  } 
-
 }
