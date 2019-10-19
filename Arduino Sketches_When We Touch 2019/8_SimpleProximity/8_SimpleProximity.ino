@@ -56,4 +56,6 @@ void loop() {
     bt->stopTrack();
     bt->turnLedOff();
   } 
+
+  bt->doTimerTasks();
 }

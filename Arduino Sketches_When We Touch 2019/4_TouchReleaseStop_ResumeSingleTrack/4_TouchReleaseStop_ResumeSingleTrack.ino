@@ -79,4 +79,5 @@ void loop() {
     bt->turnLedOff();
   } 
 
+  bt->doTimerTasks();
 }

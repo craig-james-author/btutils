@@ -78,4 +78,5 @@ void loop() {
     bt->pauseTrack();
   } 
 
+  bt->doTimerTasks();
 }

@@ -61,4 +61,6 @@ void loop() {
       bt->turnLedOn();
     }
   }
+
+  bt->doTimerTasks();
 }
