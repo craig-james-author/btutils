@@ -40,8 +40,7 @@ void setup() {
   // The first number is touch, the second number is release. Touch <i>must</i>
   // be greater than release.
 
- bt->setTouchReleaseThreshold(1, .5
- );
+  bt->setTouchReleaseThreshold(40,20);
 
   
   for (int i = 0; i <= LAST_PIN; i++) {
@@ -61,35 +60,44 @@ void loop() {
 
   int lastPlayed  = bt->getLastTrackPlayed();
   int currentLocation = bt->getCurrentTrackLocation();
+  int playerStatus = bt->getPlayerStatus();
   if (touchStatus == NEW_TOUCH) {
-    if (bt->getPlayerStatus() == IS_PAUSED && trackNumber == lastPlayed) {
+    if (playerStatus == IS_PAUSED && trackNumber == lastPlayed) {
       bt->resumeTrack();
-      //Serial.println("Resume track");
+      bt->log_action("Resume track:", lastPlayed);
     } else {
-      if (bt->getPlayerStatus() == IS_PLAYING) {
+      if (playerStatus == IS_PLAYING) {
         trackPosition[lastPlayed] += currentLocation;
+      } else if (playerStatus == IS_STOPPED) {
+	trackPosition[lastPlayed] = 0;
       }
       bt->startTrack(trackNumber, trackPosition[trackNumber]);
-     // Serial.print("Start track ");
-      //Serial.print(trackNumber);
-      //Serial.print(" at ");
-      //Serial.println(trackPosition[trackNumber]);
+      bt->log_action("Continue track: ", trackNumber);
     }
     bt->turnLedOn();
   }
 
-  // Pause the track as soon as the release is detected. Notice that
-  // getCurrentTrackLocation() returns the location *difference* from
-  // where you last started, not the absolute position, so we have to
-  // add it to the last track-position value.
+  // Pause the track if a release is detected. Notice that
+  // getCurrentTrackLocation() returns the location difference from where
+  // you last started, not the absolute position, so we have to add it to
+  // the last track-position value.
 
   else if (touchStatus == NEW_RELEASE) {
-    trackPosition[lastPlayed] += currentLocation;
-    bt->pauseTrack();
-    // Serial.print("Pause track at: ");
-    // Serial.println(trackPosition[lastPlayed]);
+    if (playerStatus == IS_STOPPED) {
+      trackPosition[lastPlayed] = 0;
+      bt->stopTrack();
+    } else {
+      trackPosition[lastPlayed] += currentLocation;
+      bt->pauseTrack();
+      bt->log_action("Pause track: ", lastPlayed);
+    }
     bt->turnLedOff();
-  } 
+  }
 
+  // This last sectoin turns the LED off if the end of the track is reached
+  // while the pin is still being touched.
+  else if (playerStatus == IS_STOPPED) {
+    bt->turnLedOff();
+  }
   bt->doTimerTasks();
 }
