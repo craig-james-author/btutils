@@ -42,7 +42,7 @@ void setup() {
   // The first number is touch, the second number is release. Touch <i>must</i>
   // be greater than release.
 
-  bt->setTouchReleaseThreshold(40,20);
+  bt->setTouchReleaseThreshold(5,2);
 
   
   for (int i = 0; i <= LAST_PIN; i++) {
