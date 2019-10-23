@@ -479,12 +479,12 @@ void BtUtils::startTrack(int trackNumber, uint32_t location) {
     // subsequent getCurrentTrackLocation() calls return the DIFFERENCE from where you last
     // started, not the actual location! So this one-second delay is necessary, and basically
     // makes the feature useless.
-    delay(1000);
+    delay(900);
     _MP3player->skipTo(location);
     delay(100);
-    if (_MP3player->isPlaying() != 1) {	// did it happen to reach the end?
-      stopTrack();
-    }
+    //if (_MP3player->isPlaying() != 1) {	// did it happen to reach the end?
+    //  stopTrack();
+    //}
   }
   _lastTrackPlayed = trackNumber;
   _lastStartTime = millis();

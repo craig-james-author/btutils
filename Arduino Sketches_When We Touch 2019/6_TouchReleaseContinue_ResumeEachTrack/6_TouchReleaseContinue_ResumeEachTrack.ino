@@ -28,10 +28,10 @@ void setup() {
 
   // bt->setFadeOutTime(2000);   // 2 second fade-out
 
-   // Set the touch sensitivity. Low values make it very sensitive (i.e. it
+  // Set the touch sensitivity. Low values make it very sensitive (i.e. it
   // will trigger a touch even when your hand is nearby), and high valuse
   // make it less sensitive (i.e. you have to actually touch the contact).
-  // The first number is touch, the second number is release. Touch <i>must</i>
+  // The first number is touch, the second number is release. Touch must
   // be greater than release.
 
    bt->setTouchReleaseThreshold(10, 8);
@@ -46,14 +46,20 @@ void loop() {
 
   int trackNumber;
   int touchStatus = bt->getPinTouchStatus(&trackNumber);
-
   int lastPlayed  = bt->getLastTrackPlayed();
+  int currentLocation = bt->getCurrentTrackLocation();
+  int playerStatus = bt->getPlayerStatus();
+
+  if (playerStatus == IS_STOPPED) { // Reached the end of a track?
+    bt->turnLedOff();
+    trackPosition[lastPlayed] = 0;
+    bt->stopTrack();
+  }
   if (touchStatus == NEW_TOUCH) {
-    int currentLocation = bt->getCurrentTrackLocation();
-    if (currentLocation == 0) {
-      trackPosition[lastPlayed] = 0;
-    } else {
+    if (playerStatus == IS_PLAYING) {
       trackPosition[lastPlayed] += currentLocation;
+    } else {
+      trackPosition[lastPlayed] = 0;
     }
     bt->startTrack(trackNumber, trackPosition[trackNumber]);
     bt->turnLedOn();
