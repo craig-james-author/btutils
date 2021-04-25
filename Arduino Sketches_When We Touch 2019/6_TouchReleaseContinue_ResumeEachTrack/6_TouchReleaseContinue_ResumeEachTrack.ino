@@ -19,6 +19,13 @@ uint32_t trackPosition[12];
 void setup() {
   bt = BtUtils::setup(&sd, &MP3player);
 
+  // Set the output volume (left and right). This ranges from zero (silent) to
+  // 100 (full volume).  The default is 100 (i.e. if you don't call this
+  // function at all, the volume will be 100%).
+
+  // bt->setVolume(100, 100);
+
+
   // Set the fade-in time in milliseconds (e.g. 1000 is 1 second). When a track is started,
   // the volume is initially zero, and it takes this much time to reach full volume.
 
@@ -56,22 +63,24 @@ void loop() {
     bt->stopTrack();
   }
   if (touchStatus == NEW_TOUCH) {
-    if (playerStatus == IS_PLAYING) {
-      trackPosition[lastPlayed] += currentLocation;
-    } else {
-      trackPosition[lastPlayed] = 0;
-    }
-    bt->startTrack(trackNumber, trackPosition[trackNumber]);
-    bt->turnLedOn();
+    if (trackNumber != lastPlayed) {
+      if (playerStatus == IS_PLAYING) {
+	trackPosition[lastPlayed] += currentLocation;
+      } else {
+	trackPosition[lastPlayed] = 0;
+      }
+      bt->startTrack(trackNumber, trackPosition[trackNumber]);
+      bt->turnLedOn();
 
-    Serial.print("Pause track ");
-    Serial.print(lastPlayed);
-    Serial.print(" at ");
-    Serial.println(trackPosition[lastPlayed]);
-    Serial.print("Start track ");
-    Serial.print(trackNumber);
-    Serial.print(" at ");
-    Serial.println(trackPosition[trackNumber]);
+      Serial.print("Pause track ");
+      Serial.print(lastPlayed);
+      Serial.print(" at ");
+      Serial.println(trackPosition[lastPlayed]);
+      Serial.print("Start track ");
+      Serial.print(trackNumber);
+      Serial.print(" at ");
+      Serial.println(trackPosition[trackNumber]);
+    }
   }
   else if (touchStatus == NEW_RELEASE) {
     bt->turnLedOff();
