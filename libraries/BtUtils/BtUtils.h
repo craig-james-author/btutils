@@ -4,18 +4,13 @@
 #define BtUtils_h 1
 
 #include "BtUtils.h"
-// #include "math.h"
 
 // touch includes
 #include <MPR121.h>
-// #include <Wire.h>
 #define MPR121_ADDR 0x5C
 #define MPR121_INT 4
 
 // mp3 includes
-// #include <SPI.h>
-// #include <SdFat.h>
-// #include <FreeStack.h> 
 #include <SFEMP3Shield.h>
 
 // TouchBoard definitions
@@ -38,7 +33,7 @@
 // Debugging: enable/disable logging
 // #define DEBUG 1
 #ifdef DEBUG
-#define LOG_ACTION log_action
+#define LOG_ACTION _log_action
 #define SERIAL_PRINT(x) Serial.print(x)
 #define SERIAL_PRINTLN(x) Serial.println(x)
 #else
@@ -50,7 +45,7 @@
 // Disable certain unneeded features to save space
 
 #define BTUTILS_ENABLE_FADES 1
-#define BTUTILS_ENABLE_START_AFTER_DELAY 0
+#define BTUTILS_ENABLE_START_AFTER_DELAY 1
 
 class BtUtils
 {
@@ -58,7 +53,6 @@ class BtUtils
 
   BtUtils(SdFat*, SFEMP3Shield*);
   static BtUtils* setup(SdFat*, SFEMP3Shield*);
-  static void log_action(char *msg, int track);
   static void turnLedOn();
   static void turnLedOff();
   void doTimerTasks();
@@ -124,6 +118,9 @@ class BtUtils
   int  _calculateFadeTime(bool goingUp);
   void _doVolumeFadeInAndOut();
   void _startTrackIfStartDelayReached();
+#ifdef DEBUG
+  static void _log_action(const char *msg, int track);
+#endif
 };
 
 #endif
