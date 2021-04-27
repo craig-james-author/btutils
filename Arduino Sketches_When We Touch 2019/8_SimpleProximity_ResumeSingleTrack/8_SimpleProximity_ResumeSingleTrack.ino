@@ -32,11 +32,12 @@ void setup() {
   // bt->setFadeOutTime(2000);   // 2 second fade-out
 
 
-  // This is the touch threshold. Setting it low makes it like a proximity trigger. The default value is 40 for touching the senor.
-  // Low numbers make it very sensitive--it will trigger when your hand is nearby or in proximity.
-  // The higher the number makse it less sensitive (i.e. you have to actually touch the contact).
-  // The first number is touch, the second number is release. Touch must
-  // be greater than release.
+  // This is the touch threshold. Setting it low makes it like a proximity
+  // trigger. The default value is 40 for touching the senor.  Low numbers
+  // make it very sensitive--it will trigger when your hand is nearby or in
+  // proximity.  The higher the number makse it less sensitive (i.e. you
+  // have to actually touch the contact).  The first number is touch, the
+  // second number is release. Touch must be greater than release.
 
   bt->setTouchReleaseThreshold(4, 3);
 }
