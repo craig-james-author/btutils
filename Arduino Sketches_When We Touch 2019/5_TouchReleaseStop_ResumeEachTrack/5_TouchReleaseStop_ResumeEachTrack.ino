@@ -66,7 +66,6 @@ void loop() {
   if (touchStatus == NEW_TOUCH) {
     if (playerStatus == IS_PAUSED && trackNumber == lastPlayed) {
       bt->resumeTrack();
-      //bt->log_action("Resume track:", lastPlayed);
     } else {
       if (playerStatus == IS_PLAYING) {
         trackPosition[lastPlayed] += currentLocation;
@@ -74,7 +73,6 @@ void loop() {
 	trackPosition[lastPlayed] = 0;
       }
       bt->startTrack(trackNumber, trackPosition[trackNumber]);
-      //bt->log_action("Continue track: ", trackNumber);
     }
     bt->turnLedOn();
   }
@@ -88,11 +86,9 @@ void loop() {
     if (playerStatus == IS_STOPPED) {
       trackPosition[lastPlayed] = 0;
       bt->stopTrack();
-      //bt->log_action("End of track, stopped: ", lastPlayed);
     } else {
       trackPosition[lastPlayed] += currentLocation;
       bt->pauseTrack();
-      //bt->log_action("Pause track: ", lastPlayed);
     }
     bt->turnLedOff();
   }

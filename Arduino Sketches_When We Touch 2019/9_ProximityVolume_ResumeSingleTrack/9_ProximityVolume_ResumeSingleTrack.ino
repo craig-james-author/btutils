@@ -71,7 +71,6 @@ void loop() {
   // If nothing is near (proximity is zero) and a track is playing, pause it.
   if (highestProximity == 0) {
     if (playerStatus == IS_PLAYING) {
-      BtUtils::log_action("pause: ", lastTrack);
       bt->pauseTrack();
     }
     bt->setVolume(0);
@@ -84,7 +83,6 @@ void loop() {
     // Set the volume. The proximity is in percentage 0-100, and the volume is
     // also 0-100, so we can just set the volume to the proximity number.
     bt->setVolume(highestProximity);
-    BtUtils::log_action("setVolume: ", highestProximity);
 
     // If it's already playing but this is a different pin, switch tracks.
     // If it's the same pin, we don't have to do anything.
