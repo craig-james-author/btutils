@@ -34,12 +34,10 @@
 // #define DEBUG 1
 #ifdef DEBUG
 #define LOG_ACTION _log_action
-#define log_action _log_action
 #define SERIAL_PRINT(x) Serial.print(x)
 #define SERIAL_PRINTLN(x) Serial.println(x)
 #else
 #define LOG_ACTION(A,B)
-#define log_action(a,b)
 #define SERIAL_PRINT(x)
 #define SERIAL_PRINTLN(x)
 #endif
