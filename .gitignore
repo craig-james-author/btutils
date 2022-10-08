@@ -5,3 +5,12 @@ libraries/Adafruit_ST7735/
 libraries/Adafruit_GFX_Library/
 libraries/Adafruit_ST7735_and_ST7789_Library/
 libraries/SD/
+Arduino Sketches_When We Touch 2019/10_Random_Proximity/
+Arduino Sketches_When We Touch 2019/10a_Random_Touch_MP3/
+Touch Board Examples/
+Touchboard Resources/
+git-fetch.command
+git-send.command
+git-status.command
+hardware/
+windows-instructions.txt
