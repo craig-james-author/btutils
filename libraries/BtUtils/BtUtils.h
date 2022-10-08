@@ -34,10 +34,12 @@
 // #define DEBUG 1
 #ifdef DEBUG
 #define LOG_ACTION _log_action
+#define log_action _log_action
 #define SERIAL_PRINT(x) Serial.print(x)
 #define SERIAL_PRINTLN(x) Serial.println(x)
 #else
 #define LOG_ACTION(A,B)
+#define log_action(a,b)
 #define SERIAL_PRINT(x)
 #define SERIAL_PRINTLN(x)
 #endif
@@ -83,6 +85,10 @@ class BtUtils
   int getProximityPercent(int pinNumber);
   int setProximityMultiplier(float multiplier);
 
+#ifdef DEBUG
+  static void _log_action(const char *msg, int track);
+#endif
+
  private:
 
   // MP3 player status
@@ -118,9 +124,6 @@ class BtUtils
   int  _calculateFadeTime(bool goingUp);
   void _doVolumeFadeInAndOut();
   void _startTrackIfStartDelayReached();
-#ifdef DEBUG
-  static void _log_action(const char *msg, int track);
-#endif
 };
 
 #endif

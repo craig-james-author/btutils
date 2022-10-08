@@ -1,6 +1,7 @@
-arduino zip files
-Craig Examples
 .DS_Store
 LEDTest/
 libraries/Adafruit_GFX/
 libraries/Adafruit_ST7735/
+libraries/Adafruit_GFX_Library/
+libraries/Adafruit_ST7735_and_ST7789_Library/
+libraries/SD/

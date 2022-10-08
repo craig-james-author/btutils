@@ -395,14 +395,17 @@ void BtUtils::_doVolumeFadeInAndOut() {
 
     if (newVolumePercent != _actualVolume) {
       LOG_ACTION("Set volume: ", newVolumePercent);
+      Serial.print("Set volume: "); Serial.println(newVolumePercent);
       if (newVolumePercent <= 0) {
 	newVolumePercent = 0;
 	if (_playerStatus == IS_PAUSED) {
 	  _MP3player->pauseMusic();
 	  LOG_ACTION("fade-out done, track paused: ", _lastTrackPlayed);
+	  Serial.print("fade-out done, track paused: "); Serial.println(_lastTrackPlayed);
 	} else {
 	  _MP3player->stopTrack();
 	  LOG_ACTION("fade-out done, track stopped: ", _lastTrackPlayed);
+	  Serial.print("fade-out done, track stopped: "); Serial.println(_lastTrackPlayed);
 	}
       }
       _setActualVolume(newVolumePercent);
