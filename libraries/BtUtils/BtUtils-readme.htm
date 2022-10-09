@@ -25,6 +25,36 @@
   Board<sup>&trade;</sup> into a simple, easy-to-understand set of
   functions.
 </p>
+
+<p>
+  The TouchBoard comes with a number of example Arduino sketches that are
+  very helpful, but they are "low level" code that is complex and
+  inscrutable to those not "versed in the art" of C++ programming. This
+  BtUtils library provides a simplified "wrapper" for the TouchBoard
+  functionality with the hope of making the technology more accessible to
+  non-programmers.
+</p>
+
+<p>The key features provided by the BtUtils library are:
+  <ul>
+    <li>Simplified volume control.</li>
+    <li>Simplified method for checking the touch sensors.</li>
+    <li>Simplified method for starting and stopping audio tracks, and
+      checking their status</li>
+    <li>Volume fade-in/fade-out.</li>
+    <li>
+  </ul>
+</p>
+
+<p>
+  <b>NOTE:</b> The TouchBoard has limited memory (32K), and this library
+  uses a lot of that space. Complex sketches, when combined with this
+  library, often exceed the available memory. There are several directives
+  in the <code>BtUtils.h</code> that allow you to disable certain features
+  that you might not need, thereby saving space.
+</p>
+
+
 <p>
   A complete working example: File <span class="code">TemplateSetup.ino</span>
 </p>
@@ -108,7 +138,6 @@ void loop() {
   } 
 }
 </div>
-
 
 <h2>Touch/Release functions:</h2>
 
@@ -312,3 +341,26 @@ void loop() {
 <div class="desc">
   Handy utility: turn the built-in LED off.
 </div>
+
+<h2>Copyright</h2>
+
+<p>Copyright &copy; 2019-2022, Craig A. James</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.</p>
+
